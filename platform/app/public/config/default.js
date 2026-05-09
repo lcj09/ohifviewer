@@ -88,7 +88,8 @@ window.config = {
       ],
     },
   ],
-  defaultDataSourceName: 'ohif',
+  //defaultDataSourceName: 'ohif',
+  defaultDataSourceName: 'orthanc',
   /* Dynamic config allows user to pass "configUrl" query string this allows to load config without recompiling application. The regex will ensure valid configuration source */
   // dangerouslyUseDynamicConfig: {
   //   enabled: true,
@@ -100,7 +101,7 @@ window.config = {
   //   regex: /.*/,
   // },
   dataSources: [
-    {
+    /*{
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
       sourceName: 'ohif',
       configuration: {
@@ -127,9 +128,9 @@ window.config = {
         },
         omitQuotationForMultipartRequest: true,
       },
-    },
+    },*/
 
-    {
+    /*{
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
       sourceName: 'ohif2',
       configuration: {
@@ -209,17 +210,22 @@ window.config = {
           relativeResolution: 'studies',
         },
       },
-    },
+    },*/
     {
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
       sourceName: 'orthanc',
       configuration: {
-        friendlyName: 'local Orthanc DICOMWeb Server',
-        name: 'DCM4CHEE',
-        wadoUriRoot: 'http://localhost/pacs/dicom-web',
-        qidoRoot: 'http://localhost/pacs/dicom-web',
-        wadoRoot: 'http://localhost/pacs/dicom-web',
-        qidoSupportsIncludeField: true,
+        //friendlyName: 'local Orthanc DICOMWeb Server',
+        //name: 'DCM4CHEE',
+        //wadoUriRoot: 'http://localhost/pacs/dicom-web',
+        //qidoRoot: 'http://localhost/pacs/dicom-web',
+        //wadoRoot: 'http://localhost/pacs/dicom-web',
+         friendlyName: 'local Orthanc Server',
+        name: 'Orthanc',
+        wadoUriRoot: 'http://localhost:8042/wado',
+        qidoRoot: 'http://localhost:8042/dicom-web',
+        wadoRoot: 'http://localhost:8042/dicom-web',
+        qidoSupportsIncludeField: false,
         supportsReject: true,
         dicomUploadEnabled: true,
         imageRendering: 'wadors',
@@ -245,7 +251,7 @@ window.config = {
       },
     },
 
-    {
+   /* {
       namespace: '@ohif/extension-default.dataSourcesModule.dicomwebproxy',
       sourceName: 'dicomwebproxy',
       configuration: {
@@ -267,7 +273,7 @@ window.config = {
       configuration: {
         friendlyName: 'dicom local',
       },
-    },
+    },*/
   ],
   httpErrorHandler: error => {
     // This is 429 when rejected from the public idc sandbox too often.

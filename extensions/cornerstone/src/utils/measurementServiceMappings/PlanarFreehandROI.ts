@@ -93,11 +93,15 @@ const PlanarFreehandROI = {
  */
 function getMappedAnnotations(annotation, displaySetService) {
   const { metadata, data } = annotation;
-  const { cachedStats } = data;
+  // [2026-04-29] 修复：为cachedStats添加默认值空对象，防止annotation刚创建时cachedStats为undefined导致后续代码报错
+  // 在TMTV模式下，多边形测量绘制完成后，PT视口的stats可能还未计算完成，此时cachedStats可能为空或undefined
+  const { cachedStats = {} } = data;
   const { referencedImageId } = metadata;
 
-  if( !cachedStats ) {
-    return;
+  // [2026-04-29] 修复：当cachedStats为falsy时返回空数组（而非原始的return undefined）
+  // 原始代码返回undefined会导致getDisplayText中mappedAnnotations.forEach报错
+  if (!cachedStats) {
+    return [];
   }
 
   const targets = Object.keys(cachedStats);
@@ -107,6 +111,11 @@ function getMappedAnnotations(annotation, displaySetService) {
   }
 
   const annotations = [];
+  // [2026-04-29] 修复：使用Set记录已处理的Modality，避免PET/CT双volume场景下重复添加数据
+  // TMTV模式下一个测量会同时关联CT和PT两个volume（targetId不同），
+  // 不去重会导致同一测量数据被重复推入annotations数组
+  const addedModalities = new Set();
+
   Object.keys(cachedStats).forEach(targetId => {
     const targetStats = cachedStats[targetId];
 
@@ -120,6 +129,15 @@ function getMappedAnnotations(annotation, displaySetService) {
 
     const { SeriesNumber } = displaySet;
     const { mean, stdDev, max, area, Modality, areaUnit, modalityUnit } = targetStats;
+
+    // [2026-04-29] 如果该Modality已经处理过则跳过，防止PET/CT重复数据
+    if (Modality && addedModalities.has(Modality)) {
+      return;
+    }
+
+    if (Modality) {
+      addedModalities.add(Modality);
+    }
 
     annotations.push({
       SeriesInstanceUID,
@@ -210,15 +228,21 @@ function getDisplayText(mappedAnnotations, displaySet) {
   const instanceText = InstanceNumber ? ` I: ${InstanceNumber}` : '';
   const frameText = displaySet.isMultiFrame ? ` F: ${frameNumber}` : '';
 
-  const roundedArea = utils.roundNumber(area || 0, 2);
-  displayText.primary.push(`${roundedArea} ${getDisplayUnit(areaUnit)}`);
+  // [2026-04-29] 修复：添加isNaN安全检查，防止stats未计算完成时area为NaN导致显示异常
+  // 在TMTV模式下，PT视口的stats可能还未计算，此时area可能为null或NaN
+  if (!isNaN(area)) {
+    const roundedArea = utils.roundNumber(area || 0, 2);
+    displayText.primary.push(`${roundedArea} ${getDisplayUnit(areaUnit)}`);
+  }
 
   mappedAnnotations.forEach(mappedAnnotation => {
     const { unit, max, SeriesNumber } = mappedAnnotation;
 
-    const maxStr = getStatisticDisplayString(max, unit, 'max');
-
-    displayText.primary.push(maxStr);
+    // [2026-04-29] 修复：添加isNaN安全检查，防止max值未计算时显示"NaN"
+    if (!isNaN(max)) {
+      const maxStr = getStatisticDisplayString(max, unit, 'max');
+      displayText.primary.push(maxStr);
+    }
     displayText.secondary.push(`S: ${SeriesNumber}${instanceText}${frameText}`);
   });
 

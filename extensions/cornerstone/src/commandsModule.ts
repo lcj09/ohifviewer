@@ -1045,6 +1045,18 @@ function commandsModule({
       // Sometimes it is passed as value (tools with options), sometimes as itemId (toolbar buttons)
       toolName = toolName || itemId || value;
 
+      // [2026-05-08 新增] 反向互斥：当激活其他工具时自动禁用探针功能
+      // 原因：用户点击调窗/移动/放大等按钮时，应该自动关闭探针
+      try {
+        if (typeof window !== 'undefined' && (window as any).__pixelInfoEnabled === true) {
+          (window as any).__pixelInfoEnabled = false;
+          import('./Viewport/Overlays/PixelInfoOverlay').then(module => {
+            const { PixelInfoManager } = module;
+            PixelInfoManager.disable();
+          }).catch(() => {});
+        }
+      } catch (e) {}
+
       toolGroupIds = toolGroupIds.length ? toolGroupIds : toolGroupService.getToolGroupIds();
 
       toolGroupIds.forEach(toolGroupId => {
@@ -2770,6 +2782,70 @@ function commandsModule({
     decimateContours: actions.decimateContours,
     convertContourHoles: actions.convertContourHoles,
     setInterpolationToolConfiguration: actions.setInterpolationToolConfiguration,
+    // ============================================================================
+    // [2026-04-29] TMTV模式探针功能切换命令 (togglePixelInfo)
+    // ============================================================================
+    togglePixelInfo: {
+      commandFn: ({ toolGroupService }: { toolGroupService: any }) => {
+        const isNewStateEnabled = !(typeof window !== 'undefined' && (window as any).__pixelInfoEnabled === true);
+
+        (window as any).__pixelInfoEnabled = isNewStateEnabled;
+
+        import('./Viewport/Overlays/PixelInfoOverlay').then(module => {
+          const { PixelInfoManager } = module;
+          const isEnabled = PixelInfoManager.isEnabled();
+
+          if (isEnabled) {
+            PixelInfoManager.disable();
+          } else {
+            try {
+              if (toolGroupService) {
+                const toolGroupIds = toolGroupService.getToolGroupIds();
+
+                const toolsToDeactivate = [
+                  'WindowLevel',
+                  'Length',
+                  'Bidirectional',
+                  'ArrowAnnotate',
+                  'EllipticalROI',
+                  'PlanarFreehandROI',
+                  'CircleROI',
+                  'Zoom',
+                  'Pan',
+                  'Crosshairs',
+                ];
+
+                toolGroupIds.forEach((toolGroupId: string) => {
+                  const toolGroup = toolGroupService.getToolGroup(toolGroupId);
+                  if (!toolGroup) return;
+
+                  toolsToDeactivate.forEach((toolName: string) => {
+                    try {
+                      if (
+                        toolGroup.hasTool(toolName) &&
+                        toolGroup.getToolOptions(toolName)?.mode === Enums.ToolModes.Active
+                      ) {
+                        toolGroup.setToolPassive(toolName);
+                        console.log(`[togglePixelInfo] Set ${toolName} to Passive in ${toolGroupId}`);
+                      }
+                    } catch (e) {}
+                  });
+                });
+
+                const renderingEngine = cornerstoneViewportService?.getRenderingEngine?.();
+                if (renderingEngine) {
+                  renderingEngine.render();
+                }
+              }
+            } catch (e) {
+              console.error('[togglePixelInfo] Error deactivating tools:', e);
+            }
+
+            PixelInfoManager.enable();
+          }
+        });
+      },
+    },
   };
 
   return {

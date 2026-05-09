@@ -89,12 +89,32 @@ function modeFactory({ modeConfiguration }) {
 
       unsubscriptions.push(unsubscribe);
       toolbarService.register(toolbarButtons);
+
+      // [2026-04-29] TMTV模式主工具栏布局配置
+      //
+      // 工具栏section: primary (主工具栏 - 顶部水平排列)
+      // 布局顺序 (从左到右):
+      //   1. MeasurementTools - 测量工具下拉菜单 (长度/椭圆/多边形等)
+      //   2. Zoom - 缩放工具
+      //   3. Pan - 平移工具
+      //   4. WindowLevel - 窗宽窗位调节工具
+      //   5. Crosshairs - 十字线定位工具
+      //   6. TmtvLayout - TMTV专用布局选择器 (2x1/1x2/MPR等)
+      //   7. Probe - [2026-04-29 新增] 探针功能按钮 (独立显示)
+      //
+      // 设计说明:
+      //   Probe按钮放在主工具栏而非MeasurementTools下拉菜单中，
+      //   原因: 探针是高频使用功能，需要快速访问，不应隐藏在菜单里
+      //
       toolbarService.updateSection(toolbarService.sections.primary, [
-        'MeasurementTools',
-        'Zoom',
-        'Pan',
-        'WindowLevel',
-        'Crosshairs',
+        'ResetTMTV',          // [2026-05-08 新增] 完全重置按钮 (最前面)
+        'MeasurementTools',  // 测量工具组 (下拉菜单)
+        'Zoom',               // 缩放工具
+        'Pan',                // 平移工具
+        'WindowLevel',        // 窗宽窗位调节
+        'Crosshairs',         // 十字线定位
+        'TmtvLayout',         // [2026-04-28] TMTV布局选择器 (2x1/1x2/MPR等)
+        'Probe',              // [2026-04-29] 探针功能 (独立于测量区域)
       ]);
 
       toolbarService.updateSection(toolbarService.sections.viewportActionMenu.topLeft, [
@@ -124,11 +144,15 @@ function modeFactory({ modeConfiguration }) {
         'windowLevelMenu',
       ]);
 
+      // 2026-04-29 - 更新MeasurementTools部分，添加多边形测量、圆测量工具以及删除测量按钮
       toolbarService.updateSection('MeasurementTools', [
         'Length',
         'Bidirectional',
         'ArrowAnnotate',
         'EllipticalROI',
+        'PlanarFreehandROI',
+        'CircleROI',
+        'ClearMeasurements',
       ]);
 
       toolbarService.updateSection('ROIThresholdToolbox', ['SegmentationTools']);

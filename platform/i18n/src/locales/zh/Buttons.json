@@ -51,6 +51,7 @@
   "Reset to defaults": "恢复默认设置",
   "Reset View": "重置视图",
   "Reset": "$t(Common:Reset)",
+  "Reset TMTV to initial state": "重置TMTV到初始状态",
   "ROI Window": "ROI窗口",
   "Rotate +90": "顺时针旋转90°",
   "Rotate Right": "顺时针旋转",

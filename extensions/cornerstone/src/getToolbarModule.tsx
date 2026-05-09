@@ -553,6 +553,59 @@ export default function getToolbarModule({ servicesManager, extensionManager }: 
         };
       },
     },
+
+    {
+      name: 'evaluate.pixelInfoActive',
+
+      /**
+       * TMTV模式探针功能按钮状态评估函数
+       *
+       * 功能说明:
+       *   读取探针功能的当前全局状态，返回按钮的视觉状态配置。
+       *   用于控制[🔬探针]按钮是否显示高亮(active)状态。
+       *
+       * 调用时机:
+       *   OHIF框架在渲染工具栏按钮时自动调用此函数
+       *
+       * 返回值格式 (与 evaluate.cornerstoneTool 保持一致):
+       *   {
+       *     disabled: boolean,  // 是否禁用按钮 (false=始终可用)
+       *     isActive: boolean,  // 是否激活/高亮 (true=显示active样式)
+       *   }
+       *
+       * 数据源:
+       *   window.__pixelInfoEnabled - 全局状态变量
+       *   由 PixelInfoOverlay.tsx 中的 PixelInfoManager 维护
+       *   用户点击探针按钮时通过 togglePixelInfo 命令更新此值
+       *
+       * 工作原理:
+       *   OHIF框架渲染周期 → 调用本函数 → 读取 window.__pixelInfoEnabled
+     *   → 返回 { isActive: true/false } → 按钮组件根据isActive更新CSS类名
+     *   → 高亮/取消高亮视觉效果
+       *
+       * 使用场景:
+       *   场景1: 页面初始加载 → window.__pixelInfoEnabled = false → 按钮不高亮
+       *   场景2: 用户点击启用探针 → window.__pixelInfoEnabled = true → 按钮高亮
+       *   场景3: 用户再次点击禁用 → window.__pixelInfoEnabled = false → 按钮取消高亮
+       */
+      evaluate: () => {
+        try {
+          const isEnabled = (window as any).__pixelInfoEnabled === true;
+
+          return {
+            disabled: false,
+            isActive: isEnabled,
+          };
+        } catch (e) {
+          console.error('[PixelInfo evaluate] Error:', e);
+
+          return {
+            disabled: false,
+            isActive: false,
+          };
+        }
+      },
+    },
   ];
 }
 
