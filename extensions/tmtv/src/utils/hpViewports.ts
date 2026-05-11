@@ -480,6 +480,124 @@ const mipSAGITTAL: AppTypes.HangingProtocol.Viewport = {
   ],
 };
 
+// ============================================================================
+// [2026-05-11 新增] MIP轴位视图 - 用于横截面+MIP图布局
+// ============================================================================
+// 功能：显示PT数据的最大密度投影（轴向）
+// 特点：
+//   - 使用MIP混合模式，显示整个体积的最大强度值
+//   - 轴向视角，从上往下看
+//   - 与PT视图同步窗宽窗位
+//   - 隐藏叠加层以获得更清晰的MIP效果
+// 用途：用于快速查看全身PET扫描的整体代谢情况
+// ============================================================================
+const mipAXIAL: AppTypes.HangingProtocol.Viewport = {
+  viewportOptions: {
+    viewportId: 'mipAxial',
+    viewportType: 'volume',
+    orientation: 'axial',  // 轴向（横截面）
+    background: [1, 1, 1],
+    toolGroupId: 'mipToolGroup',
+    syncGroups: [
+      {
+        type: 'voi',
+        id: 'ptWLSync',
+        source: true,
+        target: true,
+        options: {
+          syncColormap: true,
+        },
+      },
+      {
+        type: 'voi',
+        id: 'ptFusionWLSync',
+        source: true,
+        target: false,
+        options: {
+          syncColormap: false,
+          syncInvertState: false,
+        },
+      },
+      hydrateSegSync,
+    ],
+    customViewportProps: {
+      hideOverlays: true,
+    },
+  },
+  displaySets: [
+    {
+      options: {
+        blendMode: 'MIP',
+        slabThickness: 'fullVolume',
+        voi: {
+          custom: 'getPTVOIRange',
+        },
+        voiInverted: true,
+      },
+      id: 'ptDisplaySet',
+    },
+  ],
+};
+
+// ============================================================================
+// [2026-05-11 新增] MIP冠状位视图 - 用于冠状位+MIP图布局
+// ============================================================================
+// 功能：显示PT数据的最大密度投影（冠状向）
+// 特点：
+//   - 使用MIP混合模式，显示整个体积的最大强度值
+//   - 冠状向视角，从前向后看
+//   - 与PT视图同步窗宽窗位
+//   - 隐藏叠加层以获得更清晰的MIP效果
+// 用途：用于快速查看全身PET扫描的前后方向整体代谢分布
+// ============================================================================
+const mipCORONAL: AppTypes.HangingProtocol.Viewport = {
+  viewportOptions: {
+    viewportId: 'mipCoronal',
+    viewportType: 'volume',
+    orientation: 'coronal',  // 冠状向
+    background: [1, 1, 1],
+    toolGroupId: 'mipToolGroup',
+    syncGroups: [
+      {
+        type: 'voi',
+        id: 'ptWLSync',
+        source: true,
+        target: true,
+        options: {
+          syncColormap: true,
+        },
+      },
+      {
+        type: 'voi',
+        id: 'ptFusionWLSync',
+        source: true,
+        target: false,
+        options: {
+          syncColormap: false,
+          syncInvertState: false,
+        },
+      },
+      hydrateSegSync,
+    ],
+    customViewportProps: {
+      hideOverlays: true,
+    },
+  },
+  displaySets: [
+    {
+      options: {
+        blendMode: 'MIP',
+        slabThickness: 'fullVolume',
+        voi: {
+          custom: 'getPTVOIRange',
+        },
+        voiInverted: true,
+      },
+      id: 'ptDisplaySet',
+    },
+  ],
+};
+
 export {
   ctAXIAL,
   ctSAGITTAL,
@@ -491,4 +609,6 @@ export {
   fusionSAGITTAL,
   fusionCORONAL,
   mipSAGITTAL,
+  mipAXIAL,    // [2026-05-11 新增] MIP轴位视图
+  mipCORONAL,  // [2026-05-11 新增] MIP冠状位视图
 };

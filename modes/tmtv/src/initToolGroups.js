@@ -1,14 +1,15 @@
 import { MIN_SEGMENTATION_DRAWING_RADIUS, MAX_SEGMENTATION_DRAWING_RADIUS } from './constants';
-import { PlanarFreehandROITool } from '@cornerstonejs/tools';
+import { PlanarFreehandROITool, CrosshairsTool } from '@cornerstonejs/tools'; // [2026-05-11 新增] 导入CrosshairsTool，用于修补mouseMoveCallback崩溃问题
 
+// [2026-05-11 修改] 工具组ID定义
+// 移除了 MPR: 'mpr'，原因：TMTV模式不再创建独立的MPR工具组，
+// 避免覆盖基础查看器的MPR工具组导致黑屏问题
 export const toolGroupIds = {
   CT: 'ctToolGroup',
   PT: 'ptToolGroup',
   Fusion: 'fusionToolGroup',
   MIP: 'mipToolGroup',
   default: 'default',
-  // 2026-04-28 - 新增MPR布局工具组，用于支持十字线等工具（三维不需要）
-  MPR: 'mpr',
 };
 
 function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
@@ -160,9 +161,8 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.Fusion, tools);
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.default, tools);
 
-  // 2026-04-29 - MIP工具组配置保持原始状态
-  // 注意：MIP视图与十字线工具不兼容，但修改MIP工具组会影响其他布局
-  // 因此暂不对MIP工具组进行修改
+  // [2026-05-11 修改] MIP工具组添加passive工具（StackScroll/Zoom/Pan）
+  // 和disabled工具（Crosshairs），确保MIP视口支持基本操作和十字线兼容
   const mipTools = {
     active: [
       {
@@ -180,6 +180,11 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
         bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
       },
     ],
+    passive: [
+      { toolName: toolNames.StackScroll },
+      { toolName: toolNames.Zoom },
+      { toolName: toolNames.Pan },
+    ],
     enabled: [
       {
         toolName: toolNames.OrientationMarker,
@@ -190,15 +195,28 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
         },
       },
     ],
+    disabled: [
+      // [2026-05-11 修复] Crosshairs必须注册到MIP工具组
+      // 即使是disabled状态，工具实例也会被创建
+      // 这样Crosshairs同步时不会因找不到实例而报错
+      {
+        toolName: toolNames.Crosshairs,
+        configuration: {
+          disableOnPassive: true,
+          autoPan: {
+            enabled: false,
+            panSize: 10,
+          },
+        },
+      },
+    ],
   };
 
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.MIP, mipTools);
 
-  // 2026-04-28 - 初始化MPR布局工具组，支持十字线等工具（三维不需要十字线）
-  // [2026-04-29] 更新：MPR toolGroup 使用标准工具配置
-  // 注意：Crosshairs 在此配置中被禁用（disableOnPassive: true），
-  //       但用户可以通过工具栏手动激活十字线功能
-  toolGroupService.createToolGroupAndAddTools(toolGroupIds.MPR, tools);
+  // [2026-05-11 修改] 移除了MPR工具组的创建
+  // 原因：TMTV模式创建MPR工具组会覆盖基础查看器的同名工具组，导致基础查看器MPR黑屏
+  // TMTV的MPR布局现在使用fusionToolGroup，不再需要独立的MPR工具组
 
   // ====================================================================
   // Patch PlanarFreehandROITool.renderAnnotationInstance
@@ -364,6 +382,59 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
 
       return renderStatus;
     };
+  }
+
+  // ====================================================================
+  // Patch CrosshairsTool 实例的 mouseMoveCallback
+  // 修改时间：2026-05-11
+  //
+  // 解决问题：在2x2布局（Axial/Sagittal/Coronal）中，每个toolGroup只有1个视口，
+  //          CrosshairsTool的_computeToolCenter()因视口不足而提前返回，
+  //          不初始化annotation数据，导致mouseMoveCallback收到undefined的
+  //          filteredToolAnnotations参数，访问.length时报错：
+  //          "Cannot read properties of undefined (reading 'length')"
+  //
+  // 关键发现：mouseMoveCallback 是在构造函数中定义的箭头函数实例属性：
+  //     this.mouseMoveCallback = (evt, filteredToolAnnotations) => { ... }
+  // 因此通过 CrosshairsTool.prototype 打补丁无效！
+  // 必须在实例创建后，直接修改实例的 mouseMoveCallback 属性。
+  //
+  // 修复方案：通过 toolGroupService 获取所有工具组中的 CrosshairsTool 实例，
+  //          直接在实例上包装 mouseMoveCallback，添加 undefined 检查。
+  // ====================================================================
+  try {
+    const tgIds = toolGroupService.getToolGroupIds();
+    if (tgIds && tgIds.length > 0) {
+      tgIds.forEach(tgId => {
+        try {
+          const tg = toolGroupService.getToolGroup(tgId);
+          if (!tg) return;
+
+          // toolGroupService.getToolGroup 返回的是 OHIF 封装对象
+          // 需要获取底层的 cornerstone ToolGroup 来访问工具实例
+          const csToolGroup = tg._toolGroup || tg;
+
+          // 尝试获取 Crosshairs 工具实例
+          const toolInstance = csToolGroup.getToolInstance
+            ? csToolGroup.getToolInstance('Crosshairs')
+            : csToolGroup._toolInstances?.Crosshairs;
+
+          if (toolInstance && typeof toolInstance.mouseMoveCallback === 'function') {
+            const originalCallback = toolInstance.mouseMoveCallback.bind(toolInstance);
+            toolInstance.mouseMoveCallback = function (evt, filteredToolAnnotations) {
+              if (!filteredToolAnnotations) {
+                return false;
+              }
+              return originalCallback(evt, filteredToolAnnotations);
+            };
+          }
+        } catch (e) {
+          // 单个工具组失败不影响其他
+        }
+      });
+    }
+  } catch (e) {
+    // 补丁失败不影响主流程
   }
 }
 

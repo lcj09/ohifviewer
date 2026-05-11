@@ -34,8 +34,9 @@ function TmtvLayoutSelectorWithServices({
     }
   }, [servicesManager]);
 
-  // 2026-04-29 - TMTV专用布局预设：融合相关布局和三维布局
-  // 布局命名格式：默认、2x3、2x4、MPR、三维
+  // 2026-05-11 - TMTV专用布局预设
+  // 2x2布局（Axial/Sagittal/Coronal）：十字线不崩溃但不会画参考线
+  // 2x3/2x4布局：十字线正常工作
   const tmtvPresets = [
     {
       title: t('Default'),
@@ -48,11 +49,10 @@ function TmtvLayoutSelectorWithServices({
       isPreset: true,
       isActive: activeProtocolId === '@ohif/extension-tmtv.hangingProtocolModule.ptCT' && activeStageId === 'default',
     },
-    // 2026-04-29 - 2x3布局：包含CT和PT的轴位、矢状位、冠状位
-    // 所有视图都支持十字线工具（不包含MIP视图）
+    // [2026-05-11] 轴位 2x2: CT轴位 + PET轴位 + Fusion轴位 + MIP
     {
-      title: '2x3',
-      icon: 'layout-advanced-3d-four-up',
+      title: 'Axial',
+      icon: 'layout-common-2x2',
       commandOptions: {
         protocolId: '@ohif/extension-tmtv.hangingProtocolModule.ptCT',
         stageId: '2x3-layout',
@@ -61,9 +61,10 @@ function TmtvLayoutSelectorWithServices({
       isPreset: true,
       isActive: activeProtocolId === '@ohif/extension-tmtv.hangingProtocolModule.ptCT' && activeStageId === '2x3-layout',
     },
+    // [2026-05-11] 矢状位 2x2: CT矢状位 + PET矢状位 + Fusion矢状位 + MIP
     {
-      title: '2x4',
-      icon: 'layout-common-2x3',
+      title: 'Sagittal',
+      icon: 'layout-common-2x2',
       commandOptions: {
         protocolId: '@ohif/extension-tmtv.hangingProtocolModule.ptCT',
         stageId: '2x4-layout',
@@ -72,16 +73,55 @@ function TmtvLayoutSelectorWithServices({
       isPreset: true,
       isActive: activeProtocolId === '@ohif/extension-tmtv.hangingProtocolModule.ptCT' && activeStageId === '2x4-layout',
     },
-    // 2026-04-29 - MPR布局选项：多平面重建布局
+    // [2026-05-11 新增] 冠状位 2x2: CT冠状位 + PET冠状位 + Fusion冠状位 + MIP
+    {
+      title: 'Coronal',
+      icon: 'layout-common-2x2',
+      commandOptions: {
+        protocolId: '@ohif/extension-tmtv.hangingProtocolModule.ptCT',
+        stageId: 'coronal-mip-layout',
+      },
+      disabled: false,
+      isPreset: true,
+      isActive: activeProtocolId === '@ohif/extension-tmtv.hangingProtocolModule.ptCT' && activeStageId === 'coronal-mip-layout',
+    },
+    // [2026-05-11 恢复] 原始2x3布局（CT+PT三视图，十字线正常）
+    {
+      title: '2x3',
+      icon: 'layout-advanced-3d-four-up',
+      commandOptions: {
+        protocolId: '@ohif/extension-tmtv.hangingProtocolModule.ptCT',
+        stageId: '2x3-original-layout',
+      },
+      disabled: false,
+      isPreset: true,
+      isActive: activeProtocolId === '@ohif/extension-tmtv.hangingProtocolModule.ptCT' && activeStageId === '2x3-original-layout',
+    },
+    // [2026-05-11 恢复] 原始2x4布局（PT+MIP+Fusion，十字线正常）
+    {
+      title: '2x4',
+      icon: 'layout-common-2x3',
+      commandOptions: {
+        protocolId: '@ohif/extension-tmtv.hangingProtocolModule.ptCT',
+        stageId: '2x4-original-layout',
+      },
+      disabled: false,
+      isPreset: true,
+      isActive: activeProtocolId === '@ohif/extension-tmtv.hangingProtocolModule.ptCT' && activeStageId === '2x4-original-layout',
+    },
+    // [2026-05-11 修改] TMTV专用MPR布局（Fusion三视图+十字线）
+    // 使用 TMTV 专用的 tmtv-mpr-layout，所有视口加载 Fusion 图像
+    // 不使用基础查看器的 'mpr' 协议（只加载单个 displaySet）
     {
       title: 'MPR',
       icon: 'layout-advanced-mpr',
       commandOptions: {
-        protocolId: 'mpr',
+        protocolId: '@ohif/extension-tmtv.hangingProtocolModule.ptCT',
+        stageId: 'tmtv-mpr-layout',
       },
       disabled: false,
       isPreset: true,
-      isActive: activeProtocolId === 'mpr',
+      isActive: activeProtocolId === '@ohif/extension-tmtv.hangingProtocolModule.ptCT' && activeStageId === 'tmtv-mpr-layout',
     },
     // 2026-04-29 - 三维布局：使用 only3D protocol 确保真正的3D视图
     {

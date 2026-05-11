@@ -3,17 +3,18 @@ import i18n from 'i18next';
 
 import { MIN_SEGMENTATION_DRAWING_RADIUS, MAX_SEGMENTATION_DRAWING_RADIUS } from './constants';
 
-// 2026-04-28 - 添加mipToolGroup和mpr工具组，使十字线等工具在所有布局中可用
+// 2026-04-28 - 添加mipToolGroup，使十字线等工具在所有布局中可用
+// [2026-05-11 修改] 移除 toolGroupIds.MPR（TMTV不再覆盖基础查看器的MPR工具组）
 const setToolActiveToolbar = {
   commandName: 'setToolActiveToolbar',
   commandOptions: {
-    toolGroupIds: [toolGroupIds.CT, toolGroupIds.PT, toolGroupIds.Fusion, toolGroupIds.MIP, toolGroupIds.MPR],
+    toolGroupIds: [toolGroupIds.CT, toolGroupIds.PT, toolGroupIds.Fusion, toolGroupIds.MIP],
   },
 };
 
 const toolbarButtons = [
   // ============================================================================
-  // [2026-05-08 新增] TMTV模式重置视图按钮 (与基础查看器一致)
+  // [2026-05-11 新增] TMTV模式重置视图按钮 (与基础查看器一致)
   // ============================================================================
   //
   // 按钮ID: 'ResetTMTV'
