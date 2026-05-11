@@ -436,6 +436,42 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
   } catch (e) {
     // 补丁失败不影响主流程
   }
+
+  // ====================================================================
+  // [2026-05-11 新增] Patch CrosshairsTool._computeToolCenter - 消除视口不足警告
+  //
+  // 问题：MIP toolGroup 只有1个视口(mipSAGITTAL)，
+  //       CrosshairsTool._computeToolCenter() 检测到视口<2时打印警告：
+  //       "For crosshairs to operate, at least two viewports must be given."
+  //
+  // 影响：控制台大量警告，干扰调试（功能本身不受影响）
+  //
+  // 修复：替换 _computeToolCenter，视口不足时静默返回
+  // ====================================================================
+  try {
+    const tgIds = toolGroupService.getToolGroupIds();
+    if (tgIds?.length > 0) {
+      tgIds.forEach(tgId => {
+        try {
+          const tg = toolGroupService.getToolGroup(tgId);
+          if (!tg) return;
+
+          const csToolGroup = tg._toolGroup || tg;
+          const toolInstance = csToolGroup.getToolInstance
+            ? csToolGroup.getToolInstance('Crosshairs')
+            : csToolGroup._toolInstances?.Crosshairs;
+
+          if (toolInstance?._computeToolCenter) {
+            const orig = toolInstance._computeToolCenter.bind(toolInstance);
+            toolInstance._computeToolCenter = function(viewportsInfo) {
+              if (!viewportsInfo?.length || viewportsInfo.length < 2) return;
+              return orig(viewportsInfo);
+            };
+          }
+        } catch (_) {}
+      });
+    }
+  } catch (_) {}
 }
 
 function initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
