@@ -467,9 +467,10 @@ const mipSAGITTAL: AppTypes.HangingProtocol.Viewport = {
   },
   displaySets: [
     {
+      // [2026-05-11 优化] slabThickness: 500mm（减少GPU显存占用，原:fullVolume）
       options: {
         blendMode: 'MIP',
-        slabThickness: 'fullVolume',
+        slabThickness: 500,
         voi: {
           custom: 'getPTVOIRange',
         },
@@ -526,9 +527,10 @@ const mipAXIAL: AppTypes.HangingProtocol.Viewport = {
   },
   displaySets: [
     {
+      // [2026-05-11 优化] slabThickness: 500mm（减少GPU显存占用）
       options: {
         blendMode: 'MIP',
-        slabThickness: 'fullVolume',
+        slabThickness: 500,  // 原: 'fullVolume'
         voi: {
           custom: 'getPTVOIRange',
         },
@@ -585,9 +587,10 @@ const mipCORONAL: AppTypes.HangingProtocol.Viewport = {
   },
   displaySets: [
     {
+      // [2026-05-11 优化] slabThickness: 500mm（减少GPU显存占用）
       options: {
         blendMode: 'MIP',
-        slabThickness: 'fullVolume',
+        slabThickness: 500,
         voi: {
           custom: 'getPTVOIRange',
         },

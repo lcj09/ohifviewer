@@ -1221,8 +1221,23 @@ function commandsModule({
 
       const { viewport } = enabledElement;
 
-      viewport.resetProperties?.();
-      viewport.resetCamera();
+      // [2026-05-11 修复] MIP视口检测
+      // slabThickness 在 actorEntry 上（不是 actorEntry.actor 上）
+      // 参考 BaseVolumeViewport.getSlabThickness(): actor.slabThickness
+      const actors = viewport.getActors?.() || [];
+      const isMIPViewport = actors.some(
+        entry => entry.slabThickness > 1
+      );
+
+      if (isMIPViewport) {
+        // MIP视口：只重置相机，不调用resetProperties
+        // 原因：resetProperties会将slabThickness重置为0.05→黑屏
+        // VOI由同步组管理，不需要手动重置
+        viewport.resetCamera();
+      } else {
+        viewport.resetProperties?.();
+        viewport.resetCamera();
+      }
 
       viewport.render();
     },

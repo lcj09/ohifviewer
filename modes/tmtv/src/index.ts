@@ -88,6 +88,7 @@ function modeFactory({ modeConfiguration }) {
       );
 
       unsubscriptions.push(unsubscribe);
+
       toolbarService.register(toolbarButtons);
 
       // [2026-04-29] TMTV模式主工具栏布局配置

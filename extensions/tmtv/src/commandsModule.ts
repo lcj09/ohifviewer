@@ -1,5 +1,9 @@
 import OHIF from '@ohif/core';
 import * as cs from '@cornerstonejs/core';
+import {
+  utilities as csUtils,
+  BaseVolumeViewport,
+} from '@cornerstonejs/core';
 import * as csTools from '@cornerstonejs/tools';
 import { classes } from '@ohif/core';
 import i18n from '@ohif/i18n';
@@ -52,6 +56,78 @@ const commandsModule = ({ servicesManager, commandsManager, extensionManager }: 
 
       return allAnnotationUIDs.concat(annotationUIDs);
     }, []);
+  }
+
+  // ============================================================================
+  // [2026-05-12 新增] 获取PET图像的自定义SUV窗宽窗位
+  // ============================================================================
+  //
+  // 功能：根据PT DisplaySet的元数据判断SUV是否可用，返回对应的VOI范围
+  //
+  // 返回值：
+  //   - SUV可用时：{ windowWidth: 5, windowCenter: 2.5 }
+  //     对应SUV值范围 0~5（临床常用PET显示范围）
+  //   - SUV不可用时：null（由调用方决定回退策略）
+  //
+  // 数据来源：
+  //   - 从hangingProtocolService获取ptDisplaySet的匹配详情
+  //   - 通过MetadataProvider读取DICOM scalingModule元数据
+  //   - 检查suvbw（SUV body weight）缩放因子是否存在
+  //
+  // 与hpViewports.ts中getPTVOIRange自定义属性的关系：
+  //   两者逻辑完全一致，hpViewports.ts中的版本用于初始加载，
+  //   本函数用于重置时恢复初始值
+  //
+  // ============================================================================
+  function _getPTVOIRange() {
+    const { displaySetMatchDetails } = hangingProtocolService.getMatchDetails();
+    const ptDisplaySetMatch = displaySetMatchDetails.get('ptDisplaySet');
+    if (!ptDisplaySetMatch) return null;
+
+    const ptDisplaySet = displaySetService.getDisplaySetByUID(
+      ptDisplaySetMatch.displaySetInstanceUID
+    );
+    if (!ptDisplaySet) return null;
+
+    const { imageId } = ptDisplaySet.images[0];
+    const imageIdScalingFactor = metadataProvider.get('scalingModule', imageId);
+    const isSUVAvailable = imageIdScalingFactor && imageIdScalingFactor.suvbw;
+
+    if (isSUVAvailable) {
+      return { windowWidth: 5, windowCenter: 2.5 };
+    }
+    return null;
+  }
+
+  // ============================================================================
+  // [2026-05-12 新增] 获取Fusion视口中PT volume对应的volumeId
+  // ============================================================================
+  //
+  // 功能：在Fusion视口中，CT和PT分别作为不同的volume加载，
+  //       需要通过volumeId来单独设置PT volume的属性（VOI、colormap等）
+  //
+  // 参数：
+  //   viewport - Cornerstone3D的Viewport实例
+  //
+  // 返回值：
+  //   - 成功：PT volume的volumeId字符串（包含ptDisplaySetInstanceUID）
+  //   - 失败：null（非VolumeViewport或找不到PT volume）
+  //
+  // 实现原理：
+  //   viewport.getAllVolumeIds() 返回类似 ["ctVolumeId_XXX", "ptVolumeId_YYY"]
+  //   其中ptVolumeId包含ptDisplaySet的displaySetInstanceUID
+  //   通过字符串匹配找到PT对应的volumeId
+  //
+  // ============================================================================
+  function _getPTVolumeId(viewport) {
+    const { displaySetMatchDetails } = hangingProtocolService.getMatchDetails();
+    const ptDisplaySetMatch = displaySetMatchDetails.get('ptDisplaySet');
+    if (!ptDisplaySetMatch) return null;
+
+    if (!(viewport instanceof BaseVolumeViewport)) return null;
+
+    const volumeIds = viewport.getAllVolumeIds();
+    return volumeIds.find(id => id.includes(ptDisplaySetMatch.displaySetInstanceUID));
   }
 
   const actions = {
@@ -435,6 +511,146 @@ const commandsModule = ({ servicesManager, commandsManager, extensionManager }: 
         viewport.render();
       });
     },
+    // ============================================================================
+    // [2026-05-12 新增] TMTV模式专用视口重置命令
+    // ============================================================================
+    //
+    // 解决问题：
+    //   在TMTV模式下调窗PET图像后，点击重置按钮，PET图像和MIP图像黑屏
+    //
+    // 根因分析：
+    //   基础resetViewport命令调用viewport.resetProperties()，
+    //   该方法将VOI（窗宽窗位）重置为图像默认值（来自DICOM元数据），
+    //   而非TMTV模式使用的自定义SUV值（WW:5, WC:2.5）。
+    //   对于SUV缩放的PET数据，默认VOI范围完全错误，导致黑屏。
+    //   同时ptWLSync同步组会将错误的VOI传播到MIP视口，导致MIP也黑屏。
+    //
+    // 修复方案：
+    //   根据视口所属的toolGroupId分别处理，对PT/MIP/Fusion视口
+    //   在重置后恢复自定义SUV窗宽窗位和其他TMTV特有属性
+    //
+    // 各视口类型的重置策略：
+    // ┌───────────────┬──────────────────┬──────────────────────────────────────┐
+    // │ 视口类型      │ toolGroupId      │ 重置策略                             │
+    // ├───────────────┼──────────────────┼──────────────────────────────────────┤
+    // │ CT视口        │ ctToolGroup      │ resetProperties + resetCamera        │
+    // │               │                  │ （CT使用标准HU值，默认重置即可）      │
+    // ├───────────────┼──────────────────┼──────────────────────────────────────┤
+    // │ PT视口        │ ptToolGroup      │ resetCamera + 恢复SUV VOI + invert  │
+    // │               │                  │ （不调用resetProperties，避免VOI错误）│
+    // ├───────────────┼──────────────────┼──────────────────────────────────────┤
+    // │ MIP视口       │ mipToolGroup     │ resetCamera + 恢复slabThickness      │
+    // │               │                  │ + 恢复SUV VOI + invert               │
+    // ├───────────────┼──────────────────┼──────────────────────────────────────┤
+    // │ Fusion视口    │ fusionToolGroup  │ resetProperties + resetCamera        │
+    // │               │                  │ + 恢复PT VOI + 恢复HSV色彩映射       │
+    // ├───────────────┼──────────────────┼──────────────────────────────────────┤
+    // │ 其他视口      │ (其他)           │ resetProperties + resetCamera        │
+    // │               │                  │ （默认行为）                         │
+    // └───────────────┴──────────────────┴──────────────────────────────────────┘
+    //
+    // SUV VOI恢复逻辑：
+    //   - SUV可用时：WW=5, WC=2.5 → lower=0, upper=5（SUV范围0~5）
+    //   - SUV不可用时：使用resetProperties默认值，但仍设置invert=true
+    //
+    // Fusion视口的特殊处理：
+    //   Fusion视口同时加载CT和PT两个volume，resetProperties会重置所有volume的属性。
+    //   因此需要在resetProperties之后，单独恢复PT volume的VOI和HSV色彩映射。
+    //   通过_getPTVolumeId()获取PT volume的volumeId，然后使用
+    //   viewport.setProperties(properties, volumeId)单独设置PT的属性。
+    //
+    // ============================================================================
+    resetTMTVViewport: () => {
+      const enabledElement = _getActiveViewportsEnabledElement();
+      if (!enabledElement) return;
+
+      const { viewport } = enabledElement;
+      const { activeViewportId } = viewportGridService.getState();
+      const viewportInfo = cornerstoneViewportService.getViewportInfo(activeViewportId);
+      if (!viewportInfo) return;
+
+      const toolGroupId = viewportInfo.getToolGroupId();
+      const ptVOI = _getPTVOIRange();
+
+      // ── PT视口重置 ──
+      // 只重置相机，不调用resetProperties（避免VOI被重置为错误的默认值）
+      // 手动恢复自定义SUV窗宽窗位和反色状态
+      if (toolGroupId === 'ptToolGroup') {
+        viewport.resetCamera();
+        if (ptVOI) {
+          const { lower, upper } = csUtils.windowLevel.toLowHighRange(
+            ptVOI.windowWidth,
+            ptVOI.windowCenter
+          );
+          viewport.setProperties({
+            voiRange: { lower, upper },
+            invert: true,
+          });
+        } else {
+          viewport.resetProperties?.();
+          viewport.setProperties({ invert: true });
+        }
+        viewport.render();
+      // ── MIP视口重置 ──
+      // 重置相机 + 恢复slabThickness（resetCamera不会恢复slabThickness）
+      // 同时恢复自定义SUV窗宽窗位和反色状态
+      } else if (toolGroupId === 'mipToolGroup') {
+        viewport.resetCamera();
+        viewport.setProperties({
+          slabThickness: 500,
+        });
+        if (ptVOI) {
+          const { lower, upper } = csUtils.windowLevel.toLowHighRange(
+            ptVOI.windowWidth,
+            ptVOI.windowCenter
+          );
+          viewport.setProperties({
+            voiRange: { lower, upper },
+            invert: true,
+          });
+        } else {
+          viewport.setProperties({ invert: true });
+        }
+        viewport.render();
+      // ── Fusion视口重置 ──
+      // 先调用resetProperties重置CT和PT的所有属性
+      // 然后单独恢复PT volume的VOI和HSV色彩映射
+      // 注意：setProperties必须指定volumeId，否则会影响CT volume
+      } else if (toolGroupId === 'fusionToolGroup') {
+        viewport.resetProperties?.();
+        viewport.resetCamera();
+        if (ptVOI) {
+          const ptVolumeId = _getPTVolumeId(viewport);
+          if (ptVolumeId) {
+            const { lower, upper } = csUtils.windowLevel.toLowHighRange(
+              ptVOI.windowWidth,
+              ptVOI.windowCenter
+            );
+            viewport.setProperties(
+              {
+                voiRange: { lower, upper },
+                colormap: {
+                  name: 'hsv',
+                  opacity: [
+                    { value: 0, opacity: 0 },
+                    { value: 0.1, opacity: 0.8 },
+                    { value: 1, opacity: 0.9 },
+                  ],
+                },
+              },
+              ptVolumeId
+            );
+          }
+        }
+        viewport.render();
+      // ── 其他视口（CT等）──
+      // 使用默认重置行为
+      } else {
+        viewport.resetProperties?.();
+        viewport.resetCamera();
+        viewport.render();
+      }
+    },
   };
 
   const definitions = {
@@ -473,6 +689,9 @@ const commandsModule = ({ servicesManager, commandsManager, extensionManager }: 
     },
     setFusionPTColormap: {
       commandFn: actions.setFusionPTColormap,
+    },
+    resetTMTVViewport: {
+      commandFn: actions.resetTMTVViewport,
     },
   };
 

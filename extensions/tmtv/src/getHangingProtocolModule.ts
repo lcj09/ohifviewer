@@ -312,24 +312,10 @@ const ptCT: AppTypes.HangingProtocol.Protocol = {
   modifiedDate: '2022-10-04T19:22:08.894Z',
   availableTo: {},
   editableBy: {},
-  // [2026-05-11 修改] 图像加载策略：从 'interleaveTopToBottom' 改为 'nth'
-  //
-  // 原因分析：
-  //   'interleaveTopToBottom' 策略有两个严格的提前返回条件：
-  //     1. 任何 volume 未加载到 cache → return undefined
-  //     2. 视口volume数量 ≠ displaySet数量 → return undefined
-  //   对于 Default (3x4, 10个视口) 布局，这些条件很容易不满足，
-  //   导致策略返回 undefined → runImageLoadStrategy 失败 → 打印警告
-  //   更严重的是：失败后 customImageLoadPerformed 保持 false，
-  //   后续视口持续尝试失败策略，fallback 加载路径永远不会执行！
-  //
-  // 为什么选择 'nth' 策略：
-  //   - 'nth' 策略只检查 volume 是否存在（不存在时仅 console.log）
-  //   - 不检查视口数量是否完全匹配（更宽容）
-  //   - 提供渐进式加载效果（先加载首/中/尾帧，再加载其余帧）
-  //   - 在网络不稳定或 volume 加载时机不一致时更可靠
-  //
-  imageLoadStrategy: 'nth', // 原: 'interleaveTopToBottom'
+  // [2026-05-11] 图像加载策略配置
+  // 可选值: 'default' | 'interleaveTopToBottom' | 'interleaveCenter' | 'nth'
+  // 注意：'nth' 策略可能导致布局切换时出现 VOI 同步错误
+  imageLoadStrategy: 'interleaveTopToBottom',
   protocolMatchingRules: [
     {
       attribute: 'ModalitiesInStudy',

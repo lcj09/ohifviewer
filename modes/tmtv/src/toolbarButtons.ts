@@ -14,22 +14,17 @@ const setToolActiveToolbar = {
 
 const toolbarButtons = [
   // ============================================================================
-  // [2026-05-11 新增] TMTV模式重置视图按钮 (与基础查看器一致)
-  // ============================================================================
-  //
-  // 按钮ID: 'ResetTMTV'
-  // 功能: 重置当前激活视口的属性、相机位置和缩放
-  // 命令: resetViewport (与基础查看器共用同一命令)
-  //
-  // ============================================================================
-  {
+// [2026-05-12 修改] TMTV模式重置视图按钮
+// 使用TMTV专用 resetTMTVViewport 命令（正确恢复PET SUV窗宽窗位和MIP slabThickness）
+// ============================================================================
+{
     id: 'ResetTMTV',
     uiType: 'ohif.toolButton',
     props: {
       icon: 'tool-reset',
       label: i18n.t('Buttons:Reset View'),
       tooltip: i18n.t('Buttons:Reset View'),
-      commands: 'resetViewport',
+      commands: 'resetTMTVViewport',
       evaluate: 'evaluate.action',
     },
   },
