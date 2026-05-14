@@ -163,6 +163,7 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
 
   // [2026-05-11 修改] MIP工具组添加passive工具（StackScroll/Zoom/Pan）
   // 和disabled工具（Crosshairs），确保MIP视口支持基本操作和十字线兼容
+  // [2026-05-11 新增] 添加TrackballRotate工具到passive列表，支持3D旋转MIP图像
   const mipTools = {
     active: [
       {
@@ -184,6 +185,9 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
       { toolName: toolNames.StackScroll },
       { toolName: toolNames.Zoom },
       { toolName: toolNames.Pan },
+      // [2026-05-11 新增] TrackballRotate工具 - 用于3D旋转MIP图像
+      // 激活后替换MipJumpToClick的左键绑定，实现鼠标拖拽旋转
+      { toolName: toolNames.TrackballRotateTool },
     ],
     enabled: [
       {
@@ -213,6 +217,29 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
   };
 
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.MIP, mipTools);
+
+  // [2026-05-11 新增] 创建 volume3d 工具组
+  // 原因：TMTV的三维布局(only3D)使用 toolGroupId: 'volume3d'，
+  //       如果不创建此工具组，切换到三维布局时3D旋转按钮会被禁用
+  // 参考：基础查看器 modes/basic/src/initToolGroups.ts 中的 initVolume3DToolGroup
+  const volume3dTools = {
+    active: [
+      {
+        toolName: toolNames.TrackballRotateTool,
+        bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
+      },
+      {
+        toolName: toolNames.Zoom,
+        bindings: [{ mouseButton: Enums.MouseBindings.Secondary }, { numTouchPoints: 2 }],
+      },
+      {
+        toolName: toolNames.Pan,
+        bindings: [{ mouseButton: Enums.MouseBindings.Auxiliary }, { numTouchPoints: 3 }],
+      },
+    ],
+  };
+
+  toolGroupService.createToolGroupAndAddTools('volume3d', volume3dTools);
 
   // [2026-05-11 修改] 移除了MPR工具组的创建
   // 原因：TMTV模式创建MPR工具组会覆盖基础查看器的同名工具组，导致基础查看器MPR黑屏

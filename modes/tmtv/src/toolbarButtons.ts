@@ -232,6 +232,30 @@ const toolbarButtons = [
       evaluate: 'evaluate.cornerstoneTool',
     },
   },
+  // [2026-05-11 新增] 3D旋转按钮 - 仅在MIP视口和3D视口中可用
+  // 功能：鼠标左键拖拽旋转MIP图像或3D体积
+  // 限制：CT/PT/Fusion等2D视口不可用（工具未注册到对应toolGroup）
+  {
+    id: 'TrackballRotate',
+    uiType: 'ohif.toolButton',
+    props: {
+      type: 'tool',
+      icon: 'tool-3d-rotate',
+      label: i18n.t('Buttons:3D Rotate'),
+      commands: {
+        commandName: 'setToolActiveToolbar',
+        commandOptions: {
+          // [2026-05-11] MIP工具组：旋转MIP图像；volume3d工具组：旋转3D体积
+          // CT/PT/Fusion工具组不包含此工具，按钮自动禁用
+          toolGroupIds: [toolGroupIds.MIP, 'volume3d'],
+        },
+      },
+      evaluate: {
+        name: 'evaluate.cornerstoneTool',
+        disabledText: i18n.t('Buttons:Select a MIP or 3D viewport to enable this tool'),
+      },
+    },
+  },
   {
     id: 'Pan',
     uiType: 'ohif.toolButton',
