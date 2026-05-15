@@ -146,7 +146,7 @@ function modeFactory({ modeConfiguration }) {
         'windowLevelMenu',
       ]);
 
-      // 2026-04-29 - 更新MeasurementTools部分，添加多边形测量、圆测量工具以及删除测量按钮
+      // [2026-05-15 修改] 更新MeasurementTools部分，添加角度和Cobb角测量工具
       toolbarService.updateSection('MeasurementTools', [
         'Length',
         'Bidirectional',
@@ -154,6 +154,8 @@ function modeFactory({ modeConfiguration }) {
         'EllipticalROI',
         'PlanarFreehandROI',
         'CircleROI',
+        'Angle',        // [2026-05-15 新增] 角度测量工具 - 通过三点绘制角度
+        'CobbAngle',    // [2026-05-15 新增] Cobb角测量工具 - 通过四点绘制Cobb角，用于脊柱侧弯测量
         'ClearMeasurements',
       ]);
 
