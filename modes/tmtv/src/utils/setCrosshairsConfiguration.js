@@ -30,4 +30,22 @@ export default function setCrosshairsConfiguration(
     toolNames.Crosshairs,
     crosshairsConfig
   );
+
+  // [2026-05-19 新增] SingleSliceLine工具也需要相同的配置
+  // 原因：在Fusion视口中修改slab厚度时，需要仅影响CT体积，而非同时影响PT和CT
+  const singleSliceLineConfig = toolGroupService.getToolConfiguration(
+    toolGroupIds.Fusion,
+    toolNames.SingleSliceLine
+  );
+
+  if (singleSliceLineConfig) {
+    toolGroupService.setToolConfiguration(
+      toolGroupIds.Fusion,
+      toolNames.SingleSliceLine,
+      {
+        ...singleSliceLineConfig,
+        filterActorUIDsToSetSlabThickness: [displaySets[0].displaySetInstanceUID],
+      }
+    );
+  }
 }

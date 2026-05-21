@@ -245,7 +245,9 @@ const fusionAXIAL: AppTypes.HangingProtocol.Viewport = {
     toolGroupId: 'fusionToolGroup',
     initialImageOptions: {
       // index: 5,
-      preset: 'first', // 'first', 'last', 'middle'
+      preset: 'middle', // 'first', 'last', 'middle'
+      // [2026-05-21] 改为'middle'：确保MPR布局中三个正交视图都从体积中间开始，
+      // 使十字线工具的工具中心计算正确，避免参考线偏移到视图框外
     },
     syncGroups: [
       cameraPositionSync('axialSync'),

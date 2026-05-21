@@ -149,6 +149,7 @@ import {
   ToolSculptor,
   ToolLabelmapEditWithContour,
 } from './Sources/Tools';
+import { ToolSingleSliceLine } from './Sources/ToolSingleSliceLine';
 import ActionNewDialog from './Sources/ActionNewDialog';
 import NotificationInfo from './Sources/NotificationInfo';
 import StatusLocked from './Sources/StatusLocked';
@@ -783,6 +784,7 @@ export const Icons = {
   'tool-point': (props: IconProps) => ToolCircle(props),
   'tool-freehand-line': (props: IconProps) => ToolFreehand(props),
   'tool-labelmap-edit-with-contour': (props: IconProps) => ToolLabelmapEditWithContour(props),
+  'tool-single-slice-line': (props: IconProps) => ToolSingleSliceLine(props),
   'actions-smooth': (props: IconProps) => ActionsSmooth(props),
   'actions-simplify': (props: IconProps) => ActionsSimplify(props),
   'actions-combine': (props: IconProps) => ActionsCombine(props),

@@ -101,7 +101,7 @@ window.config = {
   //   regex: /.*/,
   // },
   dataSources: [
-    /*{
+    {
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
       sourceName: 'ohif',
       configuration: {
@@ -128,7 +128,7 @@ window.config = {
         },
         omitQuotationForMultipartRequest: true,
       },
-    },*/
+    },
 
     /*{
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',

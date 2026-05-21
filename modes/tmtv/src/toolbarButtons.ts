@@ -260,6 +260,19 @@ const toolbarButtons = [
       evaluate: 'evaluate.cornerstoneTool',
     },
   },
+  // [2026-05-19 新增] 单切线旋转按钮 - 与十字线类似，但旋转时仅影响一条参考线对应的一个视口
+  // 旋转横截面中横线 → 冠状位图像变化；旋转横截面的竖线 → 矢状位图像变化
+  {
+    id: 'SingleSliceLine',
+    uiType: 'ohif.toolButton',
+    props: {
+      icon: 'tool-single-slice-line',
+      label: i18n.t('Buttons:Single Slice Line'),
+      tooltip: i18n.t('Buttons:Single Slice Line Tool'),
+      commands: setToolActiveToolbar,
+      evaluate: 'evaluate.cornerstoneTool',
+    },
+  },
   // [2026-05-11 新增] 3D旋转按钮 - 仅在MIP视口和3D视口中可用
   // 功能：鼠标左键拖拽旋转MIP图像或3D体积
   // 限制：CT/PT/Fusion等2D视口不可用（工具未注册到对应toolGroup）

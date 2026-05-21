@@ -156,5 +156,7 @@
   "Shapes": "Shapes",
   "Create new segmentation to enable shapes tool.": "Create new segmentation to enable shapes tool.",
   "US Pleura B-line Annotation": "US Pleura B-line Annotation",
-  "Arrow Annotate Tool": "Arrow Annotate Tool"
+  "Arrow Annotate Tool": "Arrow Annotate Tool",
+  "Single Slice Line": "Single Slice Line",
+  "Single Slice Line Tool": "Rotate a single reference line to change only the corresponding viewport"
 }

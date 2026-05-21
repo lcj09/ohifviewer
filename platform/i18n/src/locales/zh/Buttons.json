@@ -133,5 +133,7 @@
   "Shapes": "形状",
   "Create new segmentation to enable shapes tool.": "创建新分割以启用形状工具。",
   "US Pleura B-line Annotation": "US胸膜B线注释",
-  "Arrow Annotate Tool": "箭头注释工具"
+  "Arrow Annotate Tool": "箭头注释工具",
+  "Single Slice Line": "单切线",
+  "Single Slice Line Tool": "旋转单条参考线，仅影响对应视口"
 }

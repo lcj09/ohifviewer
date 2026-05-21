@@ -51,9 +51,11 @@ import * as polySeg from '@cornerstonejs/polymorphic-segmentation';
 
 import CalibrationLineTool from './tools/CalibrationLineTool';
 import ImageOverlayViewerTool from './tools/ImageOverlayViewerTool';
+import SingleSliceLineTool from './tools/SingleSliceLineTool';
 
 export default function initCornerstoneTools(configuration = {}) {
   CrosshairsTool.isAnnotation = false;
+  SingleSliceLineTool.isAnnotation = false;
   LabelmapSlicePropagationTool.isAnnotation = false;
   MarkerLabelmapTool.isAnnotation = false;
   ReferenceLinesTool.isAnnotation = false;
@@ -90,6 +92,7 @@ export default function initCornerstoneTools(configuration = {}) {
   addTool(CobbAngleTool);
   addTool(MagnifyTool);
   addTool(CrosshairsTool);
+  addTool(SingleSliceLineTool);
   addTool(RectangleScissorsTool);
   addTool(SphereScissorsTool);
   addTool(CircleScissorsTool);
@@ -152,6 +155,7 @@ const toolNames = {
   CobbAngle: CobbAngleTool.toolName,
   Magnify: MagnifyTool.toolName,
   Crosshairs: CrosshairsTool.toolName,
+  SingleSliceLine: SingleSliceLineTool.toolName,
   Brush: BrushTool.toolName,
   PaintFill: PaintFillTool.toolName,
   ReferenceLines: ReferenceLinesTool.toolName,

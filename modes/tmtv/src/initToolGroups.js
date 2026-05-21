@@ -1,5 +1,6 @@
 import { MIN_SEGMENTATION_DRAWING_RADIUS, MAX_SEGMENTATION_DRAWING_RADIUS } from './constants';
 import { PlanarFreehandROITool, CrosshairsTool } from '@cornerstonejs/tools'; // [2026-05-11 新增] 导入CrosshairsTool，用于修补mouseMoveCallback崩溃问题
+import { getRenderingEngine } from '@cornerstonejs/core'; // [2026-05-20 新增] 用于获取视口实例以重置相机旋转
 
 // [2026-05-11 修改] 工具组ID定义
 // 移除了 MPR: 'mpr'，原因：TMTV模式不再创建独立的MPR工具组，
@@ -148,6 +149,18 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
           },
         },
       },
+      // [2026-05-19 新增] 单切线旋转工具 - 与十字线配置相同
+      // 但旋转时仅影响一条参考线对应的一个视口
+      {
+        toolName: toolNames.SingleSliceLine,
+        configuration: {
+          disableOnPassive: true,
+          autoPan: {
+            enabled: false,
+            panSize: 10,
+          },
+        },
+      },
     ],
   };
 
@@ -205,6 +218,17 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
       // 这样Crosshairs同步时不会因找不到实例而报错
       {
         toolName: toolNames.Crosshairs,
+        configuration: {
+          disableOnPassive: true,
+          autoPan: {
+            enabled: false,
+            panSize: 10,
+          },
+        },
+      },
+      // [2026-05-19 新增] 单切线旋转工具 - 注册到MIP工具组
+      {
+        toolName: toolNames.SingleSliceLine,
         configuration: {
           disableOnPassive: true,
           autoPan: {
@@ -466,6 +490,7 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
 
   // ====================================================================
   // [2026-05-11 新增] Patch CrosshairsTool._computeToolCenter - 消除视口不足警告
+  // [2026-05-19 新增] 同时修补 SingleSliceLineTool 实例
   //
   // 问题：MIP toolGroup 只有1个视口(mipSAGITTAL)，
   //       CrosshairsTool._computeToolCenter() 检测到视口<2时打印警告：
@@ -484,17 +509,147 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
           if (!tg) return;
 
           const csToolGroup = tg._toolGroup || tg;
-          const toolInstance = csToolGroup.getToolInstance
-            ? csToolGroup.getToolInstance('Crosshairs')
-            : csToolGroup._toolInstances?.Crosshairs;
 
-          if (toolInstance?._computeToolCenter) {
-            const orig = toolInstance._computeToolCenter.bind(toolInstance);
-            toolInstance._computeToolCenter = function(viewportsInfo) {
-              if (!viewportsInfo?.length || viewportsInfo.length < 2) return;
-              return orig(viewportsInfo);
-            };
-          }
+          // 修补 Crosshairs 和 SingleSliceLine 两个工具
+          const toolNamesToPatch = ['Crosshairs', 'SingleSliceLine'];
+          toolNamesToPatch.forEach(toolName => {
+            const toolInstance = csToolGroup.getToolInstance
+              ? csToolGroup.getToolInstance(toolName)
+              : csToolGroup._toolInstances?.[toolName];
+
+            if (toolInstance?._computeToolCenter) {
+              const orig = toolInstance._computeToolCenter.bind(toolInstance);
+              toolInstance._computeToolCenter = function(viewportsInfo) {
+                if (!viewportsInfo?.length || viewportsInfo.length < 2) return;
+                return orig(viewportsInfo);
+              };
+            }
+          });
+        } catch (_) {}
+      });
+    }
+  } catch (_) {}
+
+  // ====================================================================
+  // [2026-05-20 新增] Patch CrosshairsTool/SingleSliceLineTool onSetToolActive
+  // [2026-05-20 修改] 改用 setCameraNoEvent 精确重置旋转，避免位置偏移
+  //
+  // 解决两个问题：
+  //
+  // 问题1：十字线/单切线初始加载后，只有横截面(axial)显示正确的十字线，
+  //        冠状位(coronal)和矢状位(sagittal)显示的不是十字线或位置不对
+  //
+  // 问题2：使用单切线旋转参考线后切换到十字线，十字线不正交
+  //
+  // 根因：CrosshairsTool 参考线方向 = cross(currentNormal, otherNormal)，
+  //        如果 viewPlaneNormal 不是标准正交方向，参考线方向就会错误。
+  //        SingleSliceLineTool 旋转只改变一个视口的相机，破坏正交关系。
+  //
+  // 修复方案：在 onSetToolActive 中，先重置所有视口相机的 viewPlaneNormal/viewUp
+  //          到标准正交方向，同时保持 focalPoint 和观察距离不变，
+  //          然后再重新计算十字线中心。
+  //
+  // 实现方式（精确重置，不使用 resetCamera）：
+  //   1. 获取视口的标准方向向量（通过 _getOrientationVectors）
+  //   2. 保持 focalPoint 不变（切片位置不变）
+  //   3. 根据新法线重新计算 position（focalPoint + distance * newNormal）
+  //   4. 使用 setCameraNoEvent 设置相机（不触发 CAMERA_MODIFIED 事件）
+  //      避免同步组级联更新导致位置偏移
+  //
+  // 为什么不用 resetCamera：
+  //   resetCamera 即使设置 resetPan:false/resetToCenter:false，
+  //   仍会基于体积边界重新计算 position 的距离，导致相机距离变化，
+  //   进而触发 CAMERA_MODIFIED 事件使同步组更新，造成图像位置偏移。
+  // ====================================================================
+  try {
+    const tgIds = toolGroupService.getToolGroupIds();
+    if (tgIds?.length > 0) {
+      tgIds.forEach(tgId => {
+        try {
+          const tg = toolGroupService.getToolGroup(tgId);
+          if (!tg) return;
+
+          const csToolGroup = tg._toolGroup || tg;
+
+          const toolNamesToPatch = ['Crosshairs', 'SingleSliceLine'];
+          toolNamesToPatch.forEach(toolName => {
+            const toolInstance = csToolGroup.getToolInstance
+              ? csToolGroup.getToolInstance(toolName)
+              : csToolGroup._toolInstances?.[toolName];
+
+            if (toolInstance && typeof toolInstance.onSetToolActive === 'function') {
+              const originalOnSetToolActive = toolInstance.onSetToolActive.bind(toolInstance);
+
+              toolInstance.onSetToolActive = function() {
+                // 第一步：精确重置所有视口的相机旋转到标准正交方向
+                // 仅改变 viewPlaneNormal/viewUp，保持 focalPoint 和观察距离不变
+                try {
+                  const viewportsInfo = toolInstance._getViewportsInfo
+                    ? toolInstance._getViewportsInfo()
+                    : [];
+
+                  viewportsInfo.forEach(({ viewportId, renderingEngineId }) => {
+                    try {
+                      const renderingEngine = getRenderingEngine(renderingEngineId);
+                      if (!renderingEngine) return;
+
+                      const viewport = renderingEngine.getViewport(viewportId);
+                      if (!viewport) return;
+
+                      // 检查视口是否有 orientation 属性（VolumeViewport 才有）
+                      const orientation = viewport.viewportProperties?.orientation;
+                      if (!orientation) return;
+
+                      // 检查是否有 _getOrientationVectors 方法
+                      if (typeof viewport._getOrientationVectors !== 'function') return;
+
+                      // 获取标准方向向量
+                      const standardVectors = viewport._getOrientationVectors(orientation);
+                      if (!standardVectors?.viewPlaneNormal || !standardVectors?.viewUp) return;
+
+                      // 获取当前相机参数
+                      const camera = viewport.getCamera();
+                      const { focalPoint, position } = camera;
+
+                      // 计算当前相机到焦点的距离
+                      const dx = position[0] - focalPoint[0];
+                      const dy = position[1] - focalPoint[1];
+                      const dz = position[2] - focalPoint[2];
+                      const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                      // 根据新法线方向重新计算 position
+                      // 保持 focalPoint 不变，沿新法线方向偏移相同距离
+                      const newViewPlaneNormal = standardVectors.viewPlaneNormal;
+                      const newPosition = [
+                        focalPoint[0] + distance * newViewPlaneNormal[0],
+                        focalPoint[1] + distance * newViewPlaneNormal[1],
+                        focalPoint[2] + distance * newViewPlaneNormal[2],
+                      ];
+
+                      // 使用 setCameraNoEvent 设置相机，不触发 CAMERA_MODIFIED 事件
+                      // 这样同步组不会级联更新，避免位置偏移
+                      if (typeof viewport.setCameraNoEvent === 'function') {
+                        viewport.setCameraNoEvent({
+                          viewPlaneNormal: newViewPlaneNormal,
+                          viewUp: standardVectors.viewUp,
+                          focalPoint: focalPoint,
+                          position: newPosition,
+                        });
+                      }
+                    } catch (_) {
+                      // 单个视口重置失败不影响其他
+                    }
+                  });
+                } catch (_) {
+                  // 获取视口信息失败时仍继续初始化
+                }
+
+                // 第二步：调用原始的 onSetToolActive 重新初始化十字线
+                // 此时所有视口相机已恢复到标准正交方向
+                originalOnSetToolActive();
+              };
+            }
+          });
         } catch (_) {}
       });
     }
