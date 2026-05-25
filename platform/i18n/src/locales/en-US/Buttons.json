@@ -158,5 +158,15 @@
   "US Pleura B-line Annotation": "US Pleura B-line Annotation",
   "Arrow Annotate Tool": "Arrow Annotate Tool",
   "Single Slice Line": "Single Slice Line",
-  "Single Slice Line Tool": "Rotate a single reference line to change only the corresponding viewport"
+  "Single Slice Line Tool": "Rotate a single reference line to change only the corresponding viewport",
+  "Fusion Adjust": "Adjust",
+  "Fusion Adjust: Tooltip": "Adjust, on fusion image, left click to pan, right click to rotate",
+  "Fusion Adjust: Reset": "Reset Adjust",
+  "Fusion Adjust: Instructions": "Adjust Instructions",
+  "Fusion Adjust: Dialog Title": "Adjust Instructions",
+  "Fusion Adjust: Content 1": "Manual adjust is used to fine-tune the image position. Operation methods are as follows:",
+  "Fusion Adjust: Content 2": "Left mouse button: pan PET image",
+  "Fusion Adjust: Content 3": "Right mouse button: rotate PET image",
+  "Fusion Adjust: Content 4": "Double-click right button: exit manual adjust mode",
+  "Fusion Adjust: OK": "OK"
 }

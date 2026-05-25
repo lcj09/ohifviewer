@@ -135,5 +135,15 @@
   "US Pleura B-line Annotation": "US胸膜B线注释",
   "Arrow Annotate Tool": "箭头注释工具",
   "Single Slice Line": "单切线",
-  "Single Slice Line Tool": "旋转单条参考线，仅影响对应视口"
+  "Single Slice Line Tool": "旋转单条参考线，仅影响对应视口",
+  "Fusion Adjust": "微调",
+  "Fusion Adjust: Tooltip": "微调，在融合图像上，鼠标左键平移，右键旋转",
+  "Fusion Adjust: Reset": "重置微调",
+  "Fusion Adjust: Instructions": "微调操作说明",
+  "Fusion Adjust: Dialog Title": "微调操作说明",
+  "Fusion Adjust: Content 1": "手动微调用于对图像位置进行微调，操作方法如下：",
+  "Fusion Adjust: Content 2": "鼠标左键：平移PET图像",
+  "Fusion Adjust: Content 3": "鼠标右键：旋转PET图像",
+  "Fusion Adjust: Content 4": "双击右键：退出手动微调模式",
+  "Fusion Adjust: OK": "确定"
 }

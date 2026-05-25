@@ -136,6 +136,10 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
           maxRadius: MAX_SEGMENTATION_DRAWING_RADIUS,
         },
       },
+      // [2026-05-22 新增] 融合图像微调工具 - 仅在fusionToolGroup中注册
+      // 左键拖拽平移PET图像，不影响CT图像
+      // 注意：此工具不放在共享tools对象中，避免被注册到CT/PT/default工具组
+      // { toolName: toolNames.FusionAdjust },
     ],
     enabled: [],
     disabled: [
@@ -171,7 +175,10 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
     enabled: tools.enabled,
     disabled: tools.disabled,
   });
-  toolGroupService.createToolGroupAndAddTools(toolGroupIds.Fusion, tools);
+  toolGroupService.createToolGroupAndAddTools(toolGroupIds.Fusion, {
+    ...tools,
+    passive: [...tools.passive, { toolName: toolNames.FusionAdjust }],
+  });
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.default, tools);
 
   // [2026-05-11 修改] MIP工具组添加passive工具（StackScroll/Zoom/Pan）

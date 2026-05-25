@@ -1,5 +1,6 @@
 import RectangleROIOptions from './Panels/RectangleROIOptions';
 import TmtvLayoutSelector from './Toolbar/TmtvLayoutSelector';
+import FusionAdjustMenu from './Toolbar/FusionAdjustMenu';
 
 // 2026-04-28 - TMTV专用toolbar模块
 // 注意：必须使用工厂函数模式，接收 commandsManager 和 servicesManager
@@ -14,6 +15,12 @@ export default function getToolbarModule({ commandsManager, servicesManager }) {
       name: 'ohif.tmtvLayoutSelector',
       defaultComponent: props =>
         TmtvLayoutSelector({ ...props, commandsManager, servicesManager }),
+    },
+    // 2026-05-22 - TMTV手动微调菜单组件
+    {
+      name: 'ohif.fusionAdjustMenu',
+      defaultComponent: props =>
+        FusionAdjustMenu({ ...props, commandsManager, servicesManager }),
     },
   ];
 }

@@ -651,6 +651,43 @@ const commandsModule = ({ servicesManager, commandsManager, extensionManager }: 
         viewport.render();
       }
     },
+    // ============================================================================
+    // [2026-05-22 新增] 重置融合微调偏移
+    // ============================================================================
+    //
+    // 功能：重置所有融合视口中PET图像的微调偏移，恢复到原始位置
+    //
+    // 实现原理：
+    //   通过toolGroupService获取fusionToolGroup中的FusionAdjustTool实例，
+    //   调用其resetOffset方法逐个视口重置PET actor的position偏移
+    //
+    // ============================================================================
+    resetFusionAdjust: () => {
+      try {
+        const toolGroup = toolGroupService.getToolGroup('fusionToolGroup');
+        if (!toolGroup) return;
+
+        const csToolGroup = (toolGroup as any)._toolGroup || toolGroup;
+        const toolInstance = (csToolGroup as any).getToolInstance
+          ? (csToolGroup as any).getToolInstance('FusionAdjust')
+          : (csToolGroup as any)._toolInstances?.FusionAdjust;
+
+        if (!toolInstance) return;
+
+        // 获取所有融合视口并重置偏移
+        const fusionViewportIds = toolGroup.getViewportIds();
+        if (fusionViewportIds) {
+          fusionViewportIds.forEach(viewportId => {
+            const viewport = cornerstoneViewportService.getCornerstoneViewport(viewportId);
+            if (viewport) {
+              (toolInstance as any).resetOffset(viewport);
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('resetFusionAdjust: 重置微调失败', e);
+      }
+    },
   };
 
   const definitions = {
@@ -692,6 +729,9 @@ const commandsModule = ({ servicesManager, commandsManager, extensionManager }: 
     },
     resetTMTVViewport: {
       commandFn: actions.resetTMTVViewport,
+    },
+    resetFusionAdjust: {
+      commandFn: actions.resetFusionAdjust,
     },
   };
 

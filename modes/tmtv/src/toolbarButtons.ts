@@ -273,6 +273,19 @@ const toolbarButtons = [
       evaluate: 'evaluate.cornerstoneTool',
     },
   },
+  // [2026-05-22 新增] 手动微调按钮 - 融合图像位置微调
+  // 功能：点击激活FusionAdjustTool，左键平移PET图像
+  // 下拉菜单包含重置和操作说明
+  {
+    id: 'FusionAdjust',
+    uiType: 'ohif.fusionAdjustMenu',
+    props: {
+      icon: 'tool-fusion-adjust',
+      label: i18n.t('Buttons:Fusion Adjust'),
+      tooltip: i18n.t('Buttons:Fusion Adjust'),
+      evaluate: 'evaluate.action',
+    },
+  },
   // [2026-05-11 新增] 3D旋转按钮 - 仅在MIP视口和3D视口中可用
   // 功能：鼠标左键拖拽旋转MIP图像或3D体积
   // 限制：CT/PT/Fusion等2D视口不可用（工具未注册到对应toolGroup）
