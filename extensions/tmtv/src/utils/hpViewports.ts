@@ -15,19 +15,19 @@ const hydrateSegSync = {
     matchingRules: ['sameFOR'],
   },
 };
-
+//融合视图配置
 const ctAXIAL: AppTypes.HangingProtocol.Viewport = {
   viewportOptions: {
     viewportId: 'ctAXIAL',
-    viewportType: 'volume',
-    orientation: 'axial',
-    toolGroupId: 'ctToolGroup',
+    viewportType: 'volume',//体积视图
+    orientation: 'axial',//横截面
+    toolGroupId: 'ctToolGroup',//CT工具组
     initialImageOptions: {
       // index: 5,
       preset: 'first', // 'first', 'last', 'middle'
     },
     syncGroups: [
-      cameraPositionSync('axialSync'),
+      cameraPositionSync('axialSync'),//与其他轴向视图同步机制
       {
         type: 'voi',
         id: 'ctWLSync',
@@ -281,10 +281,10 @@ const fusionAXIAL: AppTypes.HangingProtocol.Viewport = {
   },
   displaySets: [
     {
-      id: 'ctDisplaySet',
+      id: 'ctDisplaySet',//底层：CT图像
     },
     {
-      id: 'ptDisplaySet',
+      id: 'ptDisplaySet',//上层：PT图像
       options: {
         colormap: {
           name: 'hsv',
@@ -295,7 +295,7 @@ const fusionAXIAL: AppTypes.HangingProtocol.Viewport = {
           ],
         },
         voi: {
-          custom: 'getPTVOIRange',
+          custom: 'getPTVOIRange',// ← 使用自定义SUV窗宽窗位
         },
       },
     },

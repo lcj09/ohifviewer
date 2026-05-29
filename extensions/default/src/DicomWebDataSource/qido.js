@@ -37,7 +37,7 @@ const { getString, getName, getModalities } = DICOMWeb;
  * @param {string[]} qidoStudies[0].qidoStudy[dicomTag].Value - Optional string array representation of the DICOM Tag's value
  * @returns {Array} An array of Study MetaData objects
  */
-function processResults(qidoStudies) {
+function processResults(qidoStudies) {//返回查询解析后的检查列表
   if (!qidoStudies || !qidoStudies.length) {
     return [];
   }
@@ -101,7 +101,7 @@ export function processSeriesResults(qidoSeries) {
  * @param {string} [seriesInstanceUid]
  * @param {string} [queryParamaters]
  * @returns {Promise<results>} - Promise that resolves results
- */
+ */ //发送请求
 async function search(dicomWebClient, studyInstanceUid, seriesInstanceUid, queryParameters) {
   let searchResult = await dicomWebClient.searchForStudies({
     studyInstanceUid: undefined,
@@ -144,7 +144,7 @@ export default function searchStudies(server, filter) {
  * @param serverSupportsQIDOIncludeField
  * @returns {string} The URL with encoded filter query data
  */
-function mapParams(params, options = {}) {
+function mapParams(params, options = {}) {//查询参数映射，url为http://localhost:8042/dicom-web/studies?ModalitiesInStudy=AU&limit=101&offset=0&fuzzymatching=true&includefield=00081030%2C00080060
   if (!params) {
     return;
   }

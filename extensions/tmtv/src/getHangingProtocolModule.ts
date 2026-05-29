@@ -316,6 +316,7 @@ const ptCT: AppTypes.HangingProtocol.Protocol = {
   // 可选值: 'default' | 'interleaveTopToBottom' | 'interleaveCenter' | 'nth'
   // 注意：'nth' 策略可能导致布局切换时出现 VOI 同步错误
   imageLoadStrategy: 'interleaveTopToBottom',
+  //匹配规则，必须包含 PT 和 CT
   protocolMatchingRules: [
     {
       attribute: 'ModalitiesInStudy',
@@ -336,6 +337,7 @@ const ptCT: AppTypes.HangingProtocol.Protocol = {
       },
     },
   ],
+   // DisplaySet 选择器
   displaySetSelectors: {
     ctDisplaySet: {
       seriesMatchingRules: [
@@ -408,6 +410,7 @@ const ptCT: AppTypes.HangingProtocol.Protocol = {
     },
   },
   // [2026-05-11 修改] 扩展stages数组，新增冠状位2x2、原始2x3、原始2x4、TMTV MPR布局
+  //可选的多种布局
   stages: [stage1, stage2, stage3, stage4, stage5, stage6, stage7, stage8],
   numberOfPriorsReferenced: -1,
 };

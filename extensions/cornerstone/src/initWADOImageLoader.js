@@ -7,7 +7,7 @@ import dicomImageLoader from '@cornerstonejs/dicom-image-loader';
 import { errorHandler, utils } from '@ohif/core';
 
 const { registerVolumeLoader } = volumeLoader;
-
+//初始化WADO Image Loader
 export default function initWADOImageLoader(
   userAuthenticationService,
   appConfig,

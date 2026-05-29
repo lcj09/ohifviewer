@@ -144,15 +144,15 @@ function DataSourceWrapper(props: withAppTypes) {
     if (!isDataSourceInitialized) {
       return;
     }
-
+//参数解析
     const queryFilterValues = _getQueryFilterValues(location.search, STUDIES_LIMIT);
 
     // 204: no content
     async function getData() {
       setIsLoading(true);
-      log.time(Enums.TimingEnum.SEARCH_TO_LIST);
-      const studies = await dataSource.query.studies.search(queryFilterValues);
-
+      log.time(Enums.TimingEnum.SEARCH_TO_LIST);//数据查询
+      const studies = await dataSource.query.studies.search(queryFilterValues);//查询数据库检查
+    //更新数据状态
       setData({
         studies: studies || [],
         total: studies.length,
@@ -244,7 +244,7 @@ export default DataSourceWrapper;
 
 /**
  * Duplicated in `workList`
- * Need generic that can be shared? Isn't this what qs is for?
+ * Need generic that can be shared? Isn't this what qs is for? 参数解析
  * @param {*} query
  */
 function _getQueryFilterValues(query, queryLimit) {

@@ -206,6 +206,7 @@ function WorkList({
       skipNull: true,
       skipEmptyString: true,
     });
+    //构建查询字符串
     navigate({
       pathname: '/',
       search: search ? `?${search}` : undefined,
@@ -389,7 +390,7 @@ function WorkList({
 
                   return isValidB - isValidA;
                 })
-              : appConfig.loadedModes
+              : appConfig.loadedModes//遍历所有可用模式，生成启动按钮
             ).map((mode, i) => {
               if (mode.hide) {
                 // Hide this mode from display
@@ -412,7 +413,7 @@ function WorkList({
               // mode.routes[x].path
               // Don't specify default data source, and it should just be picked up... (this may not currently be the case)
               // How do we know which params to pass? Today, it's just StudyInstanceUIDs and configUrl if exists
-              const query = new URLSearchParams();
+              const query = new URLSearchParams();//生成模式链接 http://localhost:3000/tmtv?StudyInstanceUIDs=1.2.3.4.5
               if (filterValues.configUrl) {
                 query.append('configUrl', filterValues.configUrl);
               }

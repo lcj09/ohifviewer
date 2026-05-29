@@ -208,6 +208,7 @@ function createDicomWebApi(dicomWebConfig: DicomWebConfig, servicesManager) {
         ? new StaticWadoClient(wadoConfig)
         : new api.DICOMwebClient(wadoConfig);
     },
+    //查询数据库
     query: {
       studies: {
         mapParams: mapParams.bind(),
@@ -218,7 +219,7 @@ function createDicomWebApi(dicomWebConfig: DicomWebConfig, servicesManager) {
               supportsFuzzyMatching: dicomWebConfig.supportsFuzzyMatching,
               supportsWildcard: dicomWebConfig.supportsWildcard,
             }) || {};
-
+            //发送请求
           const results = await qidoSearch(qidoDicomWebClient, undefined, undefined, mappedParams);
 
           return processResults(results);
@@ -367,7 +368,7 @@ function createDicomWebApi(dicomWebConfig: DicomWebConfig, servicesManager) {
           if (!StudyInstanceUID) {
             throw new Error('Unable to query for SeriesMetadata without StudyInstanceUID');
           }
-
+          // 根据配置决定同步或异步加载
           if (dicomWebConfig.enableStudyLazyLoad) {
             return implementation._retrieveSeriesMetadataAsync(
               StudyInstanceUID,
@@ -648,6 +649,7 @@ function createDicomWebApi(dicomWebConfig: DicomWebConfig, servicesManager) {
       return seriesSummaryMetadata;
     },
     deleteStudyMetadataPromise,
+    //获取DisplaySet中的所有图像ID
     getImageIdsForDisplaySet(displaySet) {
       const images = displaySet.images;
       const imageIds = [];
@@ -658,7 +660,7 @@ function createDicomWebApi(dicomWebConfig: DicomWebConfig, servicesManager) {
 
       displaySet.images.forEach(instance => {
         const NumberOfFrames = instance.NumberOfFrames;
-
+        // 处理多帧图像
         if (NumberOfFrames > 1) {
           for (let frame = 1; frame <= NumberOfFrames; frame++) {
             const imageId = this.getImageIdsForInstance({
@@ -667,7 +669,7 @@ function createDicomWebApi(dicomWebConfig: DicomWebConfig, servicesManager) {
             });
             imageIds.push(imageId);
           }
-        } else {
+        } else {// 处理单帧图像
           const imageId = this.getImageIdsForInstance({ instance });
           imageIds.push(imageId);
         }

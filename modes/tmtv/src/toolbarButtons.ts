@@ -28,6 +28,13 @@ const toolbarButtons = [
       evaluate: 'evaluate.action',
     },
   },
+  {
+    id: 'Save',
+    uiType: 'ohif.saveMenu',
+    props: {
+      evaluate: 'evaluate.action',
+    },
+  },
 
   {
     id: 'MeasurementTools',

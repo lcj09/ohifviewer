@@ -45,6 +45,7 @@ function modeFactory({ modeConfiguration }) {
     /**
      * Lifecycle hooks
      */
+    //点击按钮，启动TMTV模式
     onModeEnter: ({ servicesManager, extensionManager, commandsManager }: withAppTypes) => {
       const {
         toolbarService,
@@ -60,9 +61,9 @@ function modeFactory({ modeConfiguration }) {
 
       const { toolNames, Enums } = utilityModule.exports;
 
-      // Init Default and SR ToolGroups
+      // Init Default and SR ToolGroups  1初始化工作组（PT  CT FUSION MIP）
       initToolGroups(toolNames, Enums, toolGroupService, commandsManager);
-
+//监听视口添加事件，2设置十字线配置和Fusion视口的活动体积
       const { unsubscribe } = toolGroupService.subscribe(
         toolGroupService.EVENTS.VIEWPORT_ADDED,
         () => {
@@ -70,14 +71,14 @@ function modeFactory({ modeConfiguration }) {
           // since in the fusion viewport we don't want both PT and CT to render MIP
           // when slabThickness is modified
           const { displaySetMatchDetails } = hangingProtocolService.getMatchDetails();
-
+         //配置十字线工具（仅对CT体积生效）
           setCrosshairsConfiguration(
             displaySetMatchDetails,
             toolNames,
             toolGroupService,
             displaySetService
           );
-
+           //配置融合活动体积（窗宽窗位控制CT，椭圆ROI控制PT）
           setFusionActiveVolume(
             displaySetMatchDetails,
             toolNames,
@@ -88,7 +89,7 @@ function modeFactory({ modeConfiguration }) {
       );
 
       unsubscriptions.push(unsubscribe);
-
+    // 3. 注册工具栏按钮
       toolbarService.register(toolbarButtons);
 
       // [2026-04-29] TMTV模式主工具栏布局配置
@@ -109,6 +110,7 @@ function modeFactory({ modeConfiguration }) {
       //
       toolbarService.updateSection(toolbarService.sections.primary, [
         'ResetTMTV',          // [2026-05-08 新增] 完全重置按钮 (最前面)
+        'Save',               // 保存下拉菜单（图像/序列）
         'MeasurementTools',   // 测量工具组 (下拉菜单)
         'Zoom',               // 缩放工具
         'Pan',                // 平移工具
@@ -185,7 +187,7 @@ function modeFactory({ modeConfiguration }) {
       // code the window level in the hanging protocol but we add a custom
       // attribute to the hanging protocol that will be used to get the
       // window level based on the metadata
-      hangingProtocolService.addCustomAttribute(
+      hangingProtocolService.addCustomAttribute(//PT voi 范围自定义属性，窗宽窗位计算
         'getPTVOIRange',
         'get PT VOI based on corrected or not',
         props => {
