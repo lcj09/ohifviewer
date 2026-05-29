@@ -180,6 +180,9 @@ function modeFactory({ modeConfiguration }) {
             commandsManager.run('createNewLabelmapFromPT');
           },
         },
+        'tmtv.imageUpload': {
+          apiUrl: 'http://192.168.103.89:8028/api/fileUpload',
+        },
       });
 
       // For the hanging protocol we need to decide on the window level

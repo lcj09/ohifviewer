@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import html2canvas from 'html2canvas';
+import { classes } from '@ohif/core';
+import { getEnabledElement as csGetEnabledElement, utilities as csUtils } from '@cornerstonejs/core';
 import {
   Popover,
   PopoverTrigger,
@@ -13,14 +16,269 @@ import {
 
 function SaveMenu({ commandsManager, servicesManager, ...props }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleSaveImage = () => {
-    setIsMenuOpen(false);
-    commandsManager.runCommand('showDownloadViewportModal');
+  // 获取所需服务
+  const {
+    viewportGridService,
+    uiNotificationService,
+    hangingProtocolService,
+    displaySetService,
+    customizationService,
+  } = servicesManager.services;
+
+  /**
+   * 获取当前活动视口的DICOM元数据
+   * 通过悬挂协议匹配详情获取DisplaySet，再从MetadataProvider获取实例元数据
+   * 返回包含patientID、patientName、studyDate等上传所需字段的元数据对象
+   */
+  const getActiveViewportMetadata = useCallback(() => {
+    try {
+      // 获取当前选中的视口ID
+      const { activeViewportId } = viewportGridService.getState();
+      if (!activeViewportId) return null;
+
+      // 通过悬挂协议获取视口匹配详情（包含DisplaySet信息）
+      const { viewportMatchDetails } = hangingProtocolService.getMatchDetails();
+      const viewportDetails = viewportMatchDetails?.get(activeViewportId);
+      if (!viewportDetails) return null;
+
+      // 获取视口关联的DisplaySet列表
+      const { displaySetsInfo } = viewportDetails;
+      if (!displaySetsInfo || displaySetsInfo.length === 0) return null;
+
+      // 取第一个DisplaySet作为当前视口的主DisplaySet
+      const firstDisplaySetUID = displaySetsInfo[0].displaySetInstanceUID;
+      const firstDisplaySet = displaySetService.getDisplaySetByUID(firstDisplaySetUID);
+      if (!firstDisplaySet) return null;
+
+      // 确保DisplaySet中有图像数据
+      if (!firstDisplaySet.images || firstDisplaySet.images.length === 0) return null;
+
+      // 获取第一张图像的imageId用于查询元数据
+      const imageId = firstDisplaySet.images[0].imageId || firstDisplaySet.images[0].id;
+      if (!imageId) return null;
+
+      // 通过MetadataProvider获取DICOM实例元数据
+      const MetadataProvider = classes.MetadataProvider;
+      const instance = MetadataProvider.get('instance', imageId);
+      if (!instance) return null;
+
+      // 性别映射：DICOM编码(M/F/O) -> 中文显示
+      const sexMap = { M: '男', F: '女', O: '其他' };
+
+      // 构造并返回上传所需的元数据对象
+      return {
+        patientID: instance.PatientID || '',
+        patientName: instance.PatientName?.Alphabetic || instance.PatientName || '',
+        patientSex: sexMap[instance.PatientSex] || instance.PatientSex || '',
+        patientBirthDate: instance.PatientBirthDate || '',
+        accessionNumber: instance.AccessionNumber || '',
+        studyDate: instance.StudyDate || '',
+        studyTime: instance.StudyTime || '',
+        seriesDescription: instance.SeriesDescription || '',
+        seriesNumber: String(instance.SeriesNumber || '1'),
+        modality: firstDisplaySet.Modality || instance.Modality || '',
+        instanceNumber: '1',
+        fileName: `${instance.PatientID || 'unknown'}_${instance.StudyDate || ''}_${firstDisplaySet.Modality || ''}_1.jpg`,
+        displaySet: firstDisplaySet,
+      };
+    } catch (e) {
+      console.error('SaveMenu: 获取视口元数据失败', e);
+      return null;
+    }
+  }, [viewportGridService, hangingProtocolService, displaySetService]);
+
+  /**
+   * 上传单张图像
+   * @param wrapperElement - 视口容器DOM元素（用于html2canvas截图）
+   * @param metadata - DICOM元数据对象
+   * @param sliceIndex - 当前切片索引（从0开始）
+   */
+  const uploadSingleImage = async (wrapperElement: HTMLElement, metadata: ReturnType<typeof getActiveViewportMetadata>, sliceIndex: number) => {
+    // 使用html2canvas截取视口DOM（包含Canvas图像 + SVG标注 + React覆盖层）
+    const canvas = await html2canvas(wrapperElement as HTMLElement, {
+      useCORS: true,
+      backgroundColor: '#000000',
+      scale: 1,
+    });
+
+    // 将Canvas转为JPG格式的Base64字符串
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    const jpgBase64 = dataUrl.replace(/^data:image\/jpeg;base64,/, '');
+
+    // 从customizationService读取可配置的上传地址
+    const uploadConfig = customizationService.getCustomization('tmtv.imageUpload') as {
+      apiUrl?: string;
+    };
+    const apiUrl = uploadConfig?.apiUrl || 'http://localhost:8028/api/fileUpload';
+
+    // 构造POST请求体：13个字段 + jpgBase64图像数据
+    const payload = {
+      patientID: metadata.patientID,
+      patientName: metadata.patientName,
+      patientSex: metadata.patientSex,
+      patientBirthDate: metadata.patientBirthDate,
+      accessionNumber: metadata.accessionNumber,
+      studyDate: metadata.studyDate,
+      studyTime: metadata.studyTime,
+      seriesDescription: metadata.seriesDescription,
+      seriesNumber: metadata.seriesNumber,
+      modality: metadata.modality,
+      // 实例号根据切片索引动态生成
+      instanceNumber: String(sliceIndex + 1),
+      // 文件名格式：{患者ID}_{检查日期}_{模态}_{切片号}.jpg
+      fileName: `${metadata.patientID}_${metadata.studyDate}_${metadata.modality}_${sliceIndex + 1}.jpg`,
+      jpgBase64,
+    };
+
+    // 发送POST请求到上传接口
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    // 检查响应状态码
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '未知错误');
+      throw new Error(`第${sliceIndex + 1}张上传失败 (${response.status}): ${errorText}`);
+    }
+
+    return response.json().catch(() => ({}));
   };
 
-  const handleSaveSeries = () => {
+  /** 处理"图像"按钮点击：上传当前选中视口的单张图像 */
+  const handleSaveImage = async () => {
     setIsMenuOpen(false);
+
+    try {
+      setIsUploading(true);
+
+      // 步骤1：获取活动视口ID
+      const { activeViewportId } = viewportGridService.getState();
+      if (!activeViewportId) throw new Error('未选中任何图像框');
+
+      // 步骤2：通过data属性找到视口DOM元素
+      const viewportElement = document.querySelector(`[data-viewportid="${activeViewportId}"]`);
+      if (!viewportElement) throw new Error('未找到选中的图像框元素');
+
+      // 步骤3：找到包含Canvas和覆盖层的wrapper容器
+      const wrapperElement = viewportElement.closest('.viewport-wrapper');
+      if (!wrapperElement) throw new Error('未找到图像框容器');
+
+      // 步骤4：获取DICOM元数据（用于构造请求参数）
+      const metadata = getActiveViewportMetadata();
+      if (!metadata) throw new Error('无法获取当前图像的DICOM元数据');
+
+      // 步骤5：截图并上传（sliceIndex=0表示当前视图）
+      await uploadSingleImage(wrapperElement as HTMLElement, metadata, 0);
+
+      uiNotificationService.show({
+        title: '上传成功',
+        message: '图像已成功上传',
+        type: 'success',
+      });
+    } catch (error) {
+      console.error('SaveMenu: 图像上传失败', error);
+      uiNotificationService.show({
+        title: '上传失败',
+        message: error instanceof Error ? error.message : '图像上传过程中发生错误',
+        type: 'error',
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  /** 处理"序列"按钮点击：遍历当前视口的所有切片并逐张上传 */
+  const handleSaveSeries = async () => {
+    setIsMenuOpen(false);
+
+    try {
+      setIsUploading(true);
+
+      // 步骤1：获取活动视口ID和DOM元素
+      const { activeViewportId } = viewportGridService.getState();
+      if (!activeViewportId) throw new Error('未选中任何图像框');
+
+      const viewportElement = document.querySelector(`[data-viewportid="${activeViewportId}"]`);
+      if (!viewportElement) throw new Error('未找到选中的图像框元素');
+
+      const wrapperElement = viewportElement.closest('.viewport-wrapper');
+      if (!wrapperElement) throw new Error('未找到图像框容器');
+
+      // 步骤2：获取Cornerstone3D的enabledElement和viewport实例
+      const enabledElement = csGetEnabledElement(viewportElement as HTMLElement);
+      if (!enabledElement) throw new Error('无法获取Cornerstone视口');
+      const { viewport } = enabledElement;
+
+      // 步骤3：获取总切片数（Volume视口专用API）
+      let numberOfSlices: number;
+      try {
+        numberOfSlices = viewport.getNumberOfSlices();
+      } catch (e) {
+        throw new Error('无法获取切片数量，当前视口可能不支持序列上传');
+      }
+
+      if (numberOfSlices <= 0 || !Number.isFinite(numberOfSlices)) {
+        throw new Error('当前视口没有可用的切片数据');
+      }
+
+      // 步骤4：获取DICOM元数据
+      const metadata = getActiveViewportMetadata();
+      if (!metadata) throw new Error('无法获取当前图像的DICOM元数据');
+
+      // 步骤5：循环遍历每一张切片，逐张截图上传
+      let successCount = 0;
+      let failCount = 0;
+
+      for (let i = 0; i < numberOfSlices; i++) {
+        try {
+          // 切换到第i张切片
+          csUtils.jumpToSlice(viewportElement as HTMLElement, { imageIndex: i });
+          // 强制重新渲染以确保截图内容正确
+          viewport.render();
+
+          // 等待渲染完成（给浏览器时间处理）
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          // 截图并上传第i张
+          await uploadSingleImage(wrapperElement as HTMLElement, metadata, i);
+          successCount++;
+        } catch (e) {
+          // 单张失败不中断整体流程，继续处理下一张
+          console.warn(`SaveMenu: 第${i + 1}张上传失败`, e);
+          failCount++;
+        }
+      }
+
+      // 步骤6：汇总结果并显示提示
+      if (failCount === 0) {
+        uiNotificationService.show({
+          title: '序列上传完成',
+          message: `共 ${successCount} 张图像全部上传成功`,
+          type: 'success',
+        });
+      } else if (successCount > 0) {
+        uiNotificationService.show({
+          title: '部分上传完成',
+          message: `成功 ${successCount} 张，失败 ${failCount} 张`,
+          type: 'warning',
+        });
+      } else {
+        throw new Error(`全部 ${failCount} 张图像上传均失败`);
+      }
+    } catch (error) {
+      console.error('SaveMenu: 序列上传失败', error);
+      uiNotificationService.show({
+        title: '序列上传失败',
+        message: error instanceof Error ? error.message : '序列上传过程中发生错误',
+        type: 'error',
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -32,15 +290,18 @@ function SaveMenu({ commandsManager, servicesManager, ...props }) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground/80 hover:bg-background hover:text-highlight"
+                className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground/80 hover:bg-background hover:text-highlight ${
+                  isUploading ? 'animate-pulse bg-primary/20 text-highlight' : ''
+                }`}
                 aria-label="保存"
+                disabled={isUploading}
               >
                 <Icons.ByName name="tool-save" className="h-7 w-7" />
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
           <TooltipContent side="bottom">
-            <div>保存</div>
+            <div>{isUploading ? '正在上传...' : '保存'}</div>
           </TooltipContent>
         </Tooltip>
         <PopoverContent
@@ -49,17 +310,21 @@ function SaveMenu({ commandsManager, servicesManager, ...props }) {
           sideOffset={8}
         >
           <div className="flex flex-col gap-0.5">
+            {/* 图像：上传当前选中视口的单张图像 */}
             <Button
               variant="ghost"
-              className="flex h-8 w-full items-center justify-start px-2 py-1 text-sm text-common-bright hover:bg-primary-dark"
+              className="flex h-8 w-full items-center justify-start px-2 py-1 text-sm text-common-bright hover:bg-primary-dark disabled:opacity-50"
               onClick={handleSaveImage}
+              disabled={isUploading}
             >
-              图像
+              {isUploading ? '上传中...' : '图像'}
             </Button>
+            {/* 序列：遍历当前视口的所有切片并逐张上传 */}
             <Button
               variant="ghost"
-              className="flex h-8 w-full items-center justify-start px-2 py-1 text-sm text-common-bright hover:bg-primary-dark"
+              className="flex h-8 w-full items-center justify-start px-2 py-1 text-sm text-common-bright hover:bg-primary-dark disabled:opacity-50"
               onClick={handleSaveSeries}
+              disabled={isUploading}
             >
               序列
             </Button>
