@@ -6,7 +6,13 @@ window.config = {
   // whiteLabeling: {},
   extensions: [],
   modes: [],
-  customizationService: {},
+  customizationService: {
+    // TMTV模式图像上传服务地址
+    // 部署时只需修改此处的apiUrl即可，无需改动源码
+    'tmtv.imageUpload': {
+      apiUrl: 'http://192.168.103.89:8028/api/fileUpload',
+    },
+  },
   showStudyList: true,
   // some windows systems have issues with more than 3 web workers
   maxNumberOfWebWorkers: 3,

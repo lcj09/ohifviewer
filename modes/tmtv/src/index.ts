@@ -181,7 +181,8 @@ function modeFactory({ modeConfiguration }) {
           },
         },
         'tmtv.imageUpload': {
-          apiUrl: 'http://192.168.103.89:8028/api/fileUpload',
+          // 从 default.js 配置文件读取上传地址，部署时只需修改配置文件
+          apiUrl: (window.config?.customizationService?.['tmtv.imageUpload'] as { apiUrl?: string })?.apiUrl || 'http://localhost:8028/api/fileUpload',
         },
       });
 
