@@ -69,7 +69,7 @@ const wadorsRetriever = (
   };
   const dicomWeb = new api.DICOMwebClient(config);
 
-  return dicomWeb.retrieveInstance({
+  return dicomWeb.retrieveInstance({ // 发送请求获取 DICOM 实例
     studyInstanceUID,
     seriesInstanceUID,
     sopInstanceUID,

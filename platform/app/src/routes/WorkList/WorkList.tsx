@@ -367,7 +367,7 @@ function WorkList({
             seriesInStudiesMap.has(studyInstanceUid)
               ? seriesInStudiesMap.get(studyInstanceUid).map(s => {
                   return {
-                    description: s.description || '(empty)',
+                    description: s.description || '(无)',
                     seriesNumber: s.seriesNumber ?? '',
                     modality: s.modality || '',
                     instances: s.numSeriesInstances || '',
@@ -524,7 +524,7 @@ function WorkList({
   const uploadProps =
     DicomUploadComponent && dataSource.getConfig()?.dicomUploadEnabled
       ? {
-          title: 'Upload files',
+          title: '上传文件',
           containerClassName: DicomUploadComponent?.containerClassName,
           closeButton: true,
           shouldCloseOnEsc: false,

@@ -273,12 +273,12 @@ class CornerstoneCacheService {
       const volumeId = `${volumeLoaderSchema}:${displaySet.displaySetInstanceUID}`;
       let volumeImageIds = this.volumeImageIds.get(displaySet.displaySetInstanceUID);
       let volume = cs3DCache.getVolume(volumeId);
-
+      //如果缓存不存在，创建新Volume
       // Parametric maps do not have image ids but they already have volume data
       // therefore a new volume should not be created.
       if (!isParametricMap && !isSegOrRtstruct && (!volumeImageIds || !volume)) {
         volumeImageIds = this._getCornerstoneVolumeImageIds(displaySet, dataSource);
-
+ // 创建并缓存Volume（内部会逐个加载图像）
         volume = await volumeLoader.createAndCacheVolume(volumeId, {
           imageIds: volumeImageIds,
         });

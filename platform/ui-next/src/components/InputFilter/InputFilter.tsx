@@ -158,7 +158,7 @@ interface InputFilterProps {
 function InputFilter({
   children,
   className,
-  placeholder = 'Search...',
+  placeholder = '搜索...',
   value,
   defaultValue = '',
   onChange,

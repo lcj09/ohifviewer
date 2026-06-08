@@ -2,7 +2,7 @@ function buildInstanceWadoRsUri(instance, config) {
   const { StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID } = instance;
   return `${config.wadoRoot}/studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances/${SOPInstanceUID}`;
 }
-
+// 构建WADO-RS图像URI
 function buildInstanceFrameWadoRsUri(instance, config, frame) {
   const baseWadoRsUri = buildInstanceWadoRsUri(instance, config);
 

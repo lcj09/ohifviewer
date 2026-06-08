@@ -24,6 +24,11 @@ import CaptureViewportModal from './CaptureViewportModal.json';
 import Hps from './Hps.json';
 import ToolbarLayoutSelector from './ToolbarLayoutSelector.json';
 import Tools from './Tools.json';
+import PanelSUV from './PanelSUV.json';
+import ROIThresholdConfiguration from './ROIThresholdConfiguration.json';
+import SegmentationPanel from './SegmentationPanel.json';
+import Messages from './Messages.json';
+import Onboarding from './Onboarding.json';
 
 export default {
   zh: {
@@ -53,5 +58,10 @@ export default {
     Hps,
     ToolbarLayoutSelector,
     Tools,
+    PanelSUV,
+    ROIThresholdConfiguration,
+    SegmentationPanel,
+    Messages,
+    Onboarding,
   },
 };

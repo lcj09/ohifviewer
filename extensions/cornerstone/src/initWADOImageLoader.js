@@ -19,12 +19,13 @@ export default function initWADOImageLoader(
     'cornerstoneStreamingDynamicImageVolume',
     cornerstoneStreamingDynamicImageVolumeLoader
   );
-
+// 初始化 DICOM Image Loader
   dicomImageLoader.init({
     maxWebWorkers: Math.min(
       Math.max(navigator.hardwareConcurrency - 1, 1),
       appConfig.maxNumberOfWebWorkers
     ),
+    // // 请求发送前处理（注入认证头）
     beforeSend: function (xhr) {
       //TODO should be removed in the future and request emitted by DicomWebDataSource
       const sourceConfig = extensionManager.getActiveDataSource()?.[0].getConfig() ?? {};

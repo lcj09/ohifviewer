@@ -194,7 +194,7 @@ export default async function init({
     [RequestTypes.Prefetch]: appConfig?.maxNumRequests?.prefetch || 5,
     [RequestTypes.Compute]: appConfig?.maxNumRequests?.compute || 10,
   };
-
+//调用wado Loader
   initWADOImageLoader(userAuthenticationService, appConfig, extensionManager);
 
   /* Measurement Service */

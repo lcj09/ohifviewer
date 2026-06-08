@@ -10,8 +10,44 @@ import {
   ToolButton,
 } from '../';
 import { IconPresentationProvider } from '@ohif/ui-next';
+import i18n from 'i18next';
 
 import NavBar from '../NavBar';
+
+// 语言切换选项（中文 / 英文）
+const LANGUAGE_OPTIONS = [
+  { value: 'zh', label: '中文' },
+  { value: 'en-US', label: 'English' },
+];
+
+// 全局语言切换按钮组件
+function LanguageSwitcher() {
+  const currentLanguage = i18n.language || 'en-US';
+
+  const handleLanguageChange = (langValue) => {
+    i18n.changeLanguage(langValue);
+    window.location.reload();
+  };
+
+  return (
+    <div className="flex items-center gap-1 rounded border border-primary-light/30 px-2 py-0.5">
+      <span className="text-xs text-primary-light">语</span>
+      {LANGUAGE_OPTIONS.map(opt => (
+        <button
+          key={opt.value}
+          onClick={() => handleLanguageChange(opt.value)}
+          className={`rounded px-1.5 py-0.5 text-xs font-medium transition-colors ${
+            currentLanguage === opt.value || (currentLanguage.startsWith('zh') && opt.value === 'zh')
+              ? 'bg-primary-active text-white'
+              : 'text-primary-light hover:text-white'
+          }`}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 // Todo: we should move this component to composition and remove props base
 
@@ -81,6 +117,10 @@ function Header({
             <div className="flex items-center justify-center space-x-2">{children}</div>
           </div>
           <div className="absolute right-0 top-1/2 flex -translate-y-1/2 select-none items-center">
+            {/* 语言切换按钮（全局） */}
+            <div className="mr-2 flex-shrink-0">
+              <LanguageSwitcher />
+            </div>
             {UndoRedo}
             <div className="border-muted mx-1.5 h-[25px] border-r"></div>
             {PatientInfo}

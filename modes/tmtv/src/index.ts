@@ -53,6 +53,7 @@ function modeFactory({ modeConfiguration }) {
         customizationService,
         hangingProtocolService,
         displaySetService,
+        viewportGridService,
       } = servicesManager.services;
 
       const utilityModule = extensionManager.getModuleEntry(
@@ -89,6 +90,7 @@ function modeFactory({ modeConfiguration }) {
       );
 
       unsubscriptions.push(unsubscribe);
+
     // 3. 注册工具栏按钮
       toolbarService.register(toolbarButtons);
 

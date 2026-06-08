@@ -677,6 +677,7 @@ function createDicomWebApi(dicomWebConfig: DicomWebConfig, servicesManager) {
 
       return imageIds;
     },
+    //获取单个图像ID
     getImageIdsForInstance({ instance, frame = undefined }) {
       const imageIds = getImageId({
         instance,

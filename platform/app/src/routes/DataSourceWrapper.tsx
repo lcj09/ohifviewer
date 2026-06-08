@@ -198,13 +198,13 @@ function DataSourceWrapper(props: withAppTypes) {
           }
 
           servicesManager.services.uiModalService.show({
-            title: 'Data Source Connection Error',
+            title: '数据源连接错误',
             content: () => {
               return (
                 <div className="text-foreground">
-                  <p className="text-red-600">Error: {e.message}</p>
+                  <p className="text-red-600">错误：{e.message}</p>
                   <p>
-                    Please ensure the following data source is configured correctly or is running:
+                    请确保以下数据源配置正确或正在运行：
                   </p>
                   <div className="mt-2 font-bold">{friendlyName}</div>
                 </div>
