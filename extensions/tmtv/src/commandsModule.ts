@@ -224,9 +224,14 @@ const commandsModule = ({ servicesManager, commandsManager, extensionManager }: 
         segments: { 1: { label: `${i18n.t('Segment')} 1`, active: true } },
       });
 
-      segmentationService.addSegmentationRepresentation(withPTViewportId, {
-        segmentationId,
-      });
+      // [2026-06-08 修复] 将 Labelmap representation 添加到所有视口
+      // 原来只添加到 PT 视口，导致 RegionSegmentPlus（打点分割）等工具
+      // 在 CT/Fusion 等非 PT 视口上无法工作（找不到 Labelmap，+ 号预览不显示）
+      for (const [viewportId] of viewportMatchDetails.entries()) {
+        segmentationService.addSegmentationRepresentation(viewportId, {
+          segmentationId,
+        });
+      }
 
       return segmentationId;
     },
@@ -688,6 +693,57 @@ const commandsModule = ({ servicesManager, commandsManager, extensionManager }: 
         console.warn('resetFusionAdjust: 重置微调失败', e);
       }
     },
+    // ============================================================================
+    // [2026-06-08 新增] 清除 ROI 阈值分割的矩形框标注
+    // ============================================================================
+    //
+    // 功能：删除当前所有 RectangleROIStartEndThreshold / RectangleROIThreshold /
+    //       CircleROIStartEndThreshold 工具绘制的矩形/圆形 ROI 标注
+    //
+    // 使用场景：
+    //   用户使用 ROI 阈值分割工具画了矩形框后，想重新画或不再需要该矩形框时，
+    //   点击此按钮即可清除已绘制的 ROI 标注（矩形框从视口消失）
+    //
+    // 实现原理：
+    //   1. 通过 annotation state manager 获取所有 ROI_THRESHOLD_MANUAL_TOOL_IDS 对应的标注
+    //   2. 调用 csTools.annotation.state.removeAnnotation() 逐个删除
+    //   3. 视口自动重绘，矩形框消失
+    //
+    // 注意事项：
+    //   - 只清除 ROI 矩形框标注，不清除 Segmentation 分割结果
+    //   - 与 ClearMeasurements 不同：Clear 清除的是测量工具(长度/椭圆等)的标注
+    //
+    // ============================================================================
+    clearROIThresholdAnnotations: () => {
+      const selectedAnnotationUIDs = _getAnnotationsSelectedByToolNames(
+        ROI_THRESHOLD_MANUAL_TOOL_IDS
+      );
+
+      if (selectedAnnotationUIDs.length === 0) {
+        uiNotificationService.show({
+          title: 'TMTV',
+          message: i18n.t('No ROI threshold annotation to remove'),
+          type: 'info',
+        });
+        return;
+      }
+
+      for (const annotationUID of selectedAnnotationUIDs) {
+        csTools.annotation.state.removeAnnotation(annotationUID);
+      }
+
+      // 重绘当前激活视口以立即更新显示
+      const enabledElement = _getActiveViewportsEnabledElement();
+      if (enabledElement) {
+        enabledElement.viewport.render();
+      }
+
+      uiNotificationService.show({
+        title: 'TMTV',
+        message: i18n.t('ROI annotations removed'),
+        type: 'success',
+      });
+    },
   };
 
   const definitions = {
@@ -732,6 +788,9 @@ const commandsModule = ({ servicesManager, commandsManager, extensionManager }: 
     },
     resetFusionAdjust: {
       commandFn: actions.resetFusionAdjust,
+    },
+    clearROIThresholdAnnotations: {//增加清除分割矩形功能
+      commandFn: actions.clearROIThresholdAnnotations,
     },
   };
 

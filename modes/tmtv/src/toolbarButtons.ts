@@ -345,6 +345,57 @@ const toolbarButtons = [
     },
   },
 
+  // [2026-06-08 新增] 清除 ROI 矩形框按钮
+  // 功能：删除已绘制的矩形/圆形 ROI 标注（RectangleROIStartEndThreshold 等）
+  // 位置：紧跟在 ROI 阈值分割按钮之后，方便用户画错时快速清除重画
+  {
+    id: 'ClearROIThresholdAnnotation',
+    uiType: 'ohif.toolBoxButton',
+    props: {
+      icon: 'old-trash',
+      label: i18n.t('Buttons:Clear ROI'),
+      tooltip: i18n.t('Buttons:Remove drawn ROI rectangle annotation'),
+      commands: {
+        commandName: 'clearROIThresholdAnnotations',
+        commandOptions: {},
+      },
+    },
+  },
+
+  // [2026-06-08 新增] 打点分割（一键点击分割）按钮
+  // 功能：鼠标悬停显示预览（+号），点击自动分割病灶区域，无需手动涂抹
+  {
+    id: 'RegionSegmentPlus',
+    uiType: 'ohif.toolBoxButton',
+    props: {
+      icon: 'icon-tool-click-segment',
+      label: i18n.t('Buttons:One Click Segment'),
+      tooltip: i18n.t(
+        'Buttons:Detects segmentable regions with one click. Hover for visual feedback—click when a plus sign appears to auto-segment the lesion.'
+      ),
+      evaluate: [
+        {
+          name: 'evaluate.cornerstone.segmentation',
+          toolNames: ['RegionSegmentPlus'],
+          disabledText: i18n.t('Buttons:Create new segmentation to enable this tool.'),
+        },
+        {
+          name: 'evaluate.cornerstone.hasSegmentationOfType',
+          segmentationRepresentationType: 'Labelmap',
+        },
+      ],
+      commands: [
+        'setToolActiveToolbar',
+        {
+          commandName: 'activateSelectedSegmentationOfType',
+          commandOptions: {
+            segmentationRepresentationType: 'Labelmap',
+          },
+        },
+      ],
+    },
+  },
+
   {
     id: 'Brush',
     uiType: 'ohif.toolButton',

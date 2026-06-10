@@ -136,6 +136,11 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
           maxRadius: MAX_SEGMENTATION_DRAWING_RADIUS,
         },
       },
+      // [2026-06-08 新增] 打点分割工具 - 一键点击自动分割病灶区域
+      // 悬停显示预览（+号），点击即自动分割，无需手动涂抹
+      {
+        toolName: 'RegionSegmentPlus',
+      },
       // [2026-05-22 新增] 融合图像微调工具 - 仅在fusionToolGroup中注册
       // 左键拖拽平移PET图像，不影响CT图像
       // 注意：此工具不放在共享tools对象中，避免被注册到CT/PT/default工具组
