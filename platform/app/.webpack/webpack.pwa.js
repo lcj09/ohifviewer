@@ -153,9 +153,14 @@ module.exports = (env, argv) => {
       client: {
         overlay: { errors: true, warnings: false },
       },
+      // 代理配置：将 /dicomweb 请求转发到 Orthanc 服务器，解决跨域问题
+      // 请求示例：/dicomweb/studies -> http://localhost:8042/dicom-web/studies
       proxy: [
         {
-          '/dicomweb': 'http://localhost:5000',
+          context: ['/dicomweb'], // 匹配以 /dicomweb 开头的请求
+          target: 'http://localhost:8042', // Orthanc 服务器地址
+          changeOrigin: true, // 修改请求头中的 Origin，避免被目标服务器拒绝
+          pathRewrite: { '^/dicomweb': '/dicom-web' }, // 路径重写：/dicomweb -> /dicom-web（Orthanc 的 DICOM Web 路径）
         },
       ],
       static: [

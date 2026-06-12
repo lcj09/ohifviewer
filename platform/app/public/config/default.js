@@ -231,9 +231,9 @@ window.config = {
         //wadoRoot: 'http://localhost/pacs/dicom-web',
          friendlyName: 'local Orthanc Server',
         name: 'Orthanc',
-        wadoUriRoot: 'http://localhost:8042/wado',
-        qidoRoot: 'http://localhost:8042/dicom-web',
-        wadoRoot: 'http://localhost:8042/dicom-web',
+        wadoUriRoot: '/dicomweb/wado',//解决跨域
+        qidoRoot: '/dicomweb',
+        wadoRoot: '/dicomweb',
         qidoSupportsIncludeField: false,
         supportsReject: true,
         dicomUploadEnabled: true,
