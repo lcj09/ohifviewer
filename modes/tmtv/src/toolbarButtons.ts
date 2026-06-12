@@ -345,22 +345,6 @@ const toolbarButtons = [
     },
   },
 
-  // [2026-06-08 新增] 清除 ROI 矩形框按钮
-  // 功能：删除已绘制的矩形/圆形 ROI 标注（RectangleROIStartEndThreshold 等）
-  // 位置：紧跟在 ROI 阈值分割按钮之后，方便用户画错时快速清除重画
-  {
-    id: 'ClearROIThresholdAnnotation',
-    uiType: 'ohif.toolBoxButton',
-    props: {
-      icon: 'old-trash',
-      label: i18n.t('Buttons:Clear ROI'),
-      tooltip: i18n.t('Buttons:Remove drawn ROI rectangle annotation'),
-      commands: {
-        commandName: 'clearROIThresholdAnnotations',
-        commandOptions: {},
-      },
-    },
-  },
 
   // [2026-06-08 新增] 打点分割（一键点击分割）按钮
   // 功能：鼠标悬停显示预览（+号），点击自动分割病灶区域，无需手动涂抹

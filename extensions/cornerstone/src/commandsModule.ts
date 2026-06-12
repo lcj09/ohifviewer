@@ -764,9 +764,28 @@ function commandsModule({
 
     removeMeasurement: ({ uid }) => {
       if (Array.isArray(uid)) {
-        measurementService.removeMany(uid);
+        uid.forEach(id => {
+          const measurement = measurementService.getMeasurement(id);
+          if (measurement) {
+            measurementService.remove(id);
+          } else {
+            annotation.state.removeAnnotation(id);
+          }
+        });
       } else {
-        measurementService.remove(uid);
+        const measurement = measurementService.getMeasurement(uid);
+        if (measurement) {
+          measurementService.remove(uid);
+        } else {
+          annotation.state.removeAnnotation(uid);
+        }
+      }
+      // Re-render the active viewport
+      const { viewportGridService } = servicesManager.services;
+      const activeViewportId = viewportGridService.getActiveViewportId();
+      const viewport = cornerstoneViewportService.getCornerstoneViewport(activeViewportId);
+      if (viewport) {
+        viewport.render();
       }
     },
 
@@ -1877,8 +1896,22 @@ function commandsModule({
     deleteActiveAnnotation: () => {
       const activeAnnotationsUID = cornerstoneTools.annotation.selection.getAnnotationsSelected();
       activeAnnotationsUID.forEach(activeAnnotationUID => {
-        measurementService.remove(activeAnnotationUID);
+        const measurement = measurementService.getMeasurement(activeAnnotationUID);
+        if (measurement) {
+          measurementService.remove(activeAnnotationUID);
+        } else {
+          // Fallback: measurementService has no record (e.g. volume viewport annotations
+          // where toMeasurement failed due to null referencedImageId), remove directly
+          annotation.state.removeAnnotation(activeAnnotationUID);
+        }
       });
+      // Re-render the active viewport
+      const { viewportGridService } = servicesManager.services;
+      const activeViewportId = viewportGridService.getActiveViewportId();
+      const viewport = cornerstoneViewportService.getCornerstoneViewport(activeViewportId);
+      if (viewport) {
+        viewport.render();
+      }
     },
     setDisplaySetsForViewports: ({ viewportsToUpdate }) => {
       const { cineService, viewportGridService } = servicesManager.services;

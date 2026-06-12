@@ -168,7 +168,6 @@ function modeFactory({ modeConfiguration }) {
       toolbarService.updateSection('ROIThresholdToolbox', ['SegmentationTools']);
       toolbarService.updateSection('SegmentationTools', [
         'RectangleROIStartEndThreshold',
-        'ClearROIThresholdAnnotation',  // [2026-06-08 新增] 清除 ROI 矩形框标注
         'RegionSegmentPlus',   // [2026-06-08 新增] 打点分割（一键点击分割）
         'BrushTools',
       ]);
