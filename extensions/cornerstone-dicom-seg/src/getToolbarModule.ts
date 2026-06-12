@@ -8,6 +8,35 @@ import SmoothContoursOptions from './components/SmoothContoursOptions';
 
 export function getToolbarModule({ servicesManager }: withAppTypes) {
   const { segmentationService, toolbarService, toolGroupService } = servicesManager.services;
+
+  /**
+   * When a segmentation tool button is evaluated as disabled (e.g. no segmentations),
+   * deactivate the tool if it's currently the active primary tool.
+   * This prevents the tool from remaining active (and usable) while the button is grayed out.
+   */
+  function _deactivateToolIfActive(viewportId, button, toolNames) {
+    if (!viewportId) return;
+
+    // Resolve the tool name(s) to check - from toolNames param or from button
+    const names = toolNames?.length
+      ? toolNames
+      : button ? [toolbarService.getToolNameForButton(button)] : [];
+
+    if (!names.length) return;
+
+    const toolGroup = toolGroupService.getToolGroupForViewport(viewportId);
+    if (!toolGroup) return;
+
+    const activeTool = toolGroup.getActivePrimaryMouseButtonTool();
+    if (names.includes(activeTool)) {
+      toolGroup.setToolPassive(activeTool);
+      // Re-activate the default WindowLevel tool
+      toolGroup.setToolActive('WindowLevel', {
+        bindings: [{ mouseButton: 1 }],
+      });
+    }
+  }
+
   return [
     {
       name: 'cornerstone.SimplifyContourOptions',
@@ -72,6 +101,8 @@ export function getToolbarModule({ servicesManager }: withAppTypes) {
         // we should then branch the buttonSectionId to have different styles
         const segmentations = segmentationService.getSegmentationRepresentations(viewportId);
         if (!segmentations?.length) {
+          // Deactivate the tool if it's currently active when no segmentations exist
+          _deactivateToolIfActive(viewportId, button, toolNames);
           return {
             disabled: true,
             disabledText: disabledText ?? i18n.t('SegmentationPanel:No segmentations available'),
@@ -80,6 +111,8 @@ export function getToolbarModule({ servicesManager }: withAppTypes) {
 
         const activeSegmentation = segmentationService.getActiveSegmentation(viewportId);
         if (!Object.keys(activeSegmentation.segments).length) {
+          // Deactivate the tool if it's currently active when no segments exist
+          _deactivateToolIfActive(viewportId, button, toolNames);
           return {
             disabled: true,
             disabledText: i18n.t('SegmentationPanel:Add segment to enable this tool'),
@@ -89,6 +122,7 @@ export function getToolbarModule({ servicesManager }: withAppTypes) {
         const toolGroup = toolGroupService.getToolGroupForViewport(viewportId);
 
         if (!toolGroup) {
+          _deactivateToolIfActive(viewportId, button, toolNames);
           return {
             disabled: true,
             disabledText: disabledText ?? i18n.t('SegmentationPanel:Not available on the current viewport'),
@@ -105,6 +139,7 @@ export function getToolbarModule({ servicesManager }: withAppTypes) {
         const toolName = toolbarService.getToolNameForButton(button);
 
         if (!toolGroup.hasTool(toolName) && !toolNames) {
+          _deactivateToolIfActive(viewportId, button, toolNames);
           return {
             disabled: true,
             disabledText: disabledText ?? i18n.t('SegmentationPanel:Not available on the current viewport'),

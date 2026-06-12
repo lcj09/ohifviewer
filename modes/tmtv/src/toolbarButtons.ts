@@ -338,7 +338,7 @@ const toolbarButtons = [
         'evaluate.cornerstone.segmentation',
         {
           name: 'evaluate.cornerstoneTool',
-          disabledText: i18n.t('Buttons:Select the PT Axial to enable this tool'),
+          disabledText: i18n.t('Buttons:Select the PT or Fusion viewport to enable this tool'),
         },
       ],
       options: 'tmtv.RectangleROIThresholdOptions',

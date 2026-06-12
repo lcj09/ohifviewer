@@ -182,7 +182,7 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
   });
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.Fusion, {
     ...tools,
-    passive: [...tools.passive, { toolName: toolNames.FusionAdjust }],
+    passive: [...tools.passive, { toolName: 'RectangleROIStartEndThreshold' }, { toolName: toolNames.FusionAdjust }],
   });
   toolGroupService.createToolGroupAndAddTools(toolGroupIds.default, tools);
 
