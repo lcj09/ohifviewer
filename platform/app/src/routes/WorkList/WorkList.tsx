@@ -392,8 +392,12 @@ function WorkList({
                 })
               : appConfig.loadedModes//遍历所有可用模式，生成启动按钮
             ).map((mode, i) => {
-              if (mode.hide) {
-                // Hide this mode from display
+              if (mode.hide || mode.routeName !== 'tmtv') {
+                // 只保留总体积代谢(TMTV)模式，屏蔽其他所有模式
+                //可以放开别的模式
+                 //if (mode.hide || mode.routeName === 'microscopy') {
+                //// Hide this mode from display（屏蔽显微镜模式）
+                //return null;
                 return null;
               }
               const modalitiesToCheck = modalities.replaceAll('/', '\\');
