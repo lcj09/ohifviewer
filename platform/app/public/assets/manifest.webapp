@@ -1,6 +1,6 @@
 {
   "version": "2.2.1",
-  "name": "OHIF Viewer",
+  "name": "东华医为核医学影像",
   "description": "OHIF Viewer",
   "icons": {
     "60": "/assets/firefox_app_60x60.png",
