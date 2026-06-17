@@ -117,11 +117,11 @@ function Header({
             <div className="flex items-center justify-center space-x-2">{children}</div>
           </div>
           <div className="absolute right-0 top-1/2 flex -translate-y-1/2 select-none items-center">
+            {UndoRedo}
             {/* 语言切换按钮（全局） */}
             <div className="mr-2 flex-shrink-0">
               <LanguageSwitcher />
             </div>
-            {UndoRedo}
             <div className="border-muted mx-1.5 h-[25px] border-r"></div>
             {PatientInfo}
             <div className="border-muted mx-1.5 h-[25px] border-r"></div>

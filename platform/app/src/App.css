@@ -2,3 +2,106 @@ body {
   overscroll-behavior: none;
   touch-action: none;
 }
+
+/* TMTV 界面主色调 - 与 jsconfigBS 保持一致 */
+
+/* 导航栏背景：深蓝灰渐变 */
+.dark .bg-popover,
+[data-theme='dark'] .bg-popover {
+  background: linear-gradient(90deg, #2b3652 0%, #435170 100%) !important;
+}
+
+/* 侧边栏背景：纯黑 */
+.dark .bg-background,
+[data-theme='dark'] .bg-background {
+  background-color: #000000 !important;
+}
+
+/* 侧边栏分割线：淡蓝/灰蓝 */
+.dark .border-background,
+[data-theme='dark'] .border-background,
+.dark .Separator,
+[data-theme='dark'] .Separator {
+  border-color: #5a5e66 !important;
+}
+
+.dark .bg-background > hr,
+.dark .bg-background > [role='separator'],
+[data-theme='dark'] .bg-background > hr,
+[data-theme='dark'] .bg-background > [role='separator'],
+.dark div[style*="background-color"] + *,
+[data-theme='dark'] div[style*="background-color"] + * {
+  border-color: #1f3960;
+}
+
+/* 选中高亮：亮青蓝色边框 */
+.dark .selected,
+[data-theme='dark'] .selected,
+.dark [data-cy*='selected'],
+[data-theme='dark'] [data-cy*='selected'] {
+  border-color: #00f3ff !important;
+}
+
+/* 工具按钮 hover/active：蓝色渐变 */
+.dark .hover\:bg-primary\/20:hover,
+[data-theme='dark'] .hover\:bg-primary\/20:hover,
+.dark .bg-primary\/20,
+[data-theme='dark'] .bg-primary\/20 {
+  background: linear-gradient(180deg, #0a5ba6 0%, #001d36 100%) !important;
+}
+
+/* 下拉面板背景：深藏青 */
+.dark .bg-muted,
+[data-theme='dark'] .bg-muted {
+  background-color: #132339 !important;
+}
+
+/* ======== 颜色变量覆盖 ======== */
+
+/* 主强调色(主题)：ElementUI 蓝 - 按钮、链接、高亮 */
+.dark,
+[data-theme='dark'] {
+  --primary: 211 98% 58%;
+  --primary-foreground: 0 0% 98%;
+}
+
+/* 主强调色 hover：深蓝 - 悬停状态 */
+.dark .text-primary:hover,
+.dark [class*="text-primary"]:hover,
+.dark a:hover,
+[data-theme='dark'] .text-primary:hover,
+[data-theme='dark'] [class*="text-primary"]:hover,
+[data-theme='dark'] a:hover {
+  color: #006FD2 !important;
+}
+
+/* 文字-标题：白色 - 导航、患者名 */
+.dark .text-foreground,
+.dark [class*="text-white"],
+[data-theme='dark'] .text-foreground,
+[data-theme='dark'] [class*="text-white"] {
+  color: #ffffff !important;
+}
+
+/* 文字-次要：浅灰蓝 - 患者信息、描述 */
+.dark .text-muted-foreground,
+.dark .muted-foreground,
+[data-theme='dark'] .text-muted-foreground,
+[data-theme='dark'] .muted-foreground {
+  color: #b6bcc8 !important;
+}
+.dark .muted-foreground {
+  color: #b6bcc8 !important;
+}
+
+/* 文字-信息：浅蓝白 - 序列信息 */
+.dark .text-neutral-light,
+[data-theme='dark'] .text-neutral-light {
+  color: #d1e4ff !important;
+}
+
+/* ======== 查询界面(WorkList)背景色 - 与 jsconfigBS 一致 ======== */
+.dark .bg-black,
+[data-theme='dark'] .bg-black {
+  background-color: #1a1f2b !important;
+}
