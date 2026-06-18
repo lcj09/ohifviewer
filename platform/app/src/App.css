@@ -5,103 +5,295 @@ body {
 
 /* TMTV 界面主色调 - 与 jsconfigBS 保持一致 */
 
-/* 导航栏背景：深蓝灰渐变 */
-.dark .bg-popover,
-[data-theme='dark'] .bg-popover {
+/* 导航栏背景：深蓝灰渐变（不依赖主题选择器） */
+.bg-popover {
   background: linear-gradient(90deg, #2b3652 0%, #435170 100%) !important;
 }
 
 /* 侧边栏背景：纯黑 */
-.dark .bg-background,
-[data-theme='dark'] .bg-background {
+.bg-background {
   background-color: #000000 !important;
 }
 
-/* 侧边栏分割线：淡蓝/灰蓝 */
-.dark .border-background,
-[data-theme='dark'] .border-background,
-.dark .Separator,
-[data-theme='dark'] .Separator {
-  border-color: #5a5e66 !important;
+/* 分割线/边框：深灰色 */
+.border-background,
+.Separator {
+  border-color: #3a3a46 !important;
 }
 
-.dark .bg-background > hr,
-.dark .bg-background > [role='separator'],
-[data-theme='dark'] .bg-background > hr,
-[data-theme='dark'] .bg-background > [role='separator'],
-.dark div[style*="background-color"] + *,
-[data-theme='dark'] div[style*="background-color"] + * {
-  border-color: #1f3960;
+.bg-background > hr,
+.bg-background > [role='separator'] {
+  border-color: #3a3a46;
 }
 
 /* 选中高亮：亮青蓝色边框 */
-.dark .selected,
-[data-theme='dark'] .selected,
-.dark [data-cy*='selected'],
-[data-theme='dark'] [data-cy*='selected'] {
+.selected,
+[data-cy*='selected'] {
   border-color: #00f3ff !important;
 }
 
 /* 工具按钮 hover/active：蓝色渐变 */
-.dark .hover\:bg-primary\/20:hover,
-[data-theme='dark'] .hover\:bg-primary\/20:hover,
-.dark .bg-primary\/20,
-[data-theme='dark'] .bg-primary\/20 {
+.hover\:bg-primary\/20:hover,
+.bg-primary\/20 {
   background: linear-gradient(180deg, #0a5ba6 0%, #001d36 100%) !important;
 }
 
-/* 下拉面板背景：深藏青 */
-.dark .bg-muted,
-[data-theme='dark'] .bg-muted {
+/* 下拉面板/选择框背景：深藏青 */
+.bg-muted {
   background-color: #132339 !important;
 }
 
 /* ======== 颜色变量覆盖 ======== */
 
-/* 主强调色(主题)：ElementUI 蓝 - 按钮、链接、高亮 */
-.dark,
-[data-theme='dark'] {
-  --primary: 211 98% 58%;
-  --primary-foreground: 0 0% 98%;
-}
-
 /* 主强调色 hover：深蓝 - 悬停状态 */
-.dark .text-primary:hover,
-.dark [class*="text-primary"]:hover,
-.dark a:hover,
-[data-theme='dark'] .text-primary:hover,
-[data-theme='dark'] [class*="text-primary"]:hover,
-[data-theme='dark'] a:hover {
-  color: #006FD2 !important;
-}
-
-/* 文字-标题：白色 - 导航、患者名 */
-.dark .text-foreground,
-.dark [class*="text-white"],
-[data-theme='dark'] .text-foreground,
-[data-theme='dark'] [class*="text-white"] {
+.text-primary:hover,
+[class*="text-primary"]:hover,
+a:hover {
   color: #ffffff !important;
 }
 
-/* 文字-次要：浅灰蓝 - 患者信息、描述 */
-.dark .text-muted-foreground,
-.dark .muted-foreground,
-[data-theme='dark'] .text-muted-foreground,
-[data-theme='dark'] .muted-foreground {
-  color: #b6bcc8 !important;
+/* 文字-标题：白色 */
+.text-foreground,
+[class*="text-white"] {
+  color: #ffffff !important;
 }
-.dark .muted-foreground {
+
+/* 所有蓝色系文字改为白色 */
+.text-primary,
+.text-primary-light,
+.text-primary-main,
+.text-primary-active,
+.text-aqua-pale,
+.text-secondary-light,
+a,
+[class*="text-primary"],
+a:not([class*="text-"]) {
+  color: #ffffff !important;
+}
+
+/* 文字-次要：浅灰蓝 */
+.text-muted-foreground,
+.muted-foreground {
   color: #b6bcc8 !important;
 }
 
-/* 文字-信息：浅蓝白 - 序列信息 */
-.dark .text-neutral-light,
-[data-theme='dark'] .text-neutral-light {
+/* 文字-信息：浅蓝白 */
+.text-neutral-light {
   color: #d1e4ff !important;
 }
 
-/* ======== 查询界面(WorkList)背景色 - 与 jsconfigBS 一致 ======== */
-.dark .bg-black,
-[data-theme='dark'] .bg-black {
-  background-color: #1a1f2b !important;
+/* ======== 查询界面(WorkList)背景色 - 与参考截图一致 ======== */
+
+/* 直接覆盖 body 和所有 bg-black 元素（不依赖主题选择器） */
+body,
+body.bg-black,
+.bg-black,
+div[class*="bg-black"],
+#root > div > div.flex.h-screen {
+  background-color: #1a1d29 !important;
+}
+
+/* 文本框/输入框背景：透明 */
+input.bg-black,
+input[class*="bg-black"],
+select,
+select option,
+textarea,
+.Input input,
+[data-cy^="input-"] {
+  background-color: transparent !important;
+  border-color: #3a3a46 !important;
+  color: #d1d5db !important;
+}
+
+/* react-select 下拉选择框（设备类型、多选等）样式覆盖 */
+.customSelect__control {
+  background-color: transparent !important;
+  border-color: #3a3a46 !important;
+}
+.customSelect__control:hover {
+  border-color: #555562 !important;
+}
+.customSelect__menu {
+  background-color: #1e2235 !important;
+  border-color: #3a3a46 !important;
+}
+.customSelect__option {
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+.customSelect__single-value,
+.customSelect__placeholder,
+.customSelect__input,
+.customSelect__input input {
+  color: #ffffff !important;
+}
+.customSelect__option--is-focused,
+.customSelect__menu-portal .customSelect__option:hover {
+  background-color: #2e3854 !important;
+}
+
+input.bg-black:focus,
+input[class*="bg-black"]:focus,
+[data-cy^="input-"]:focus,
+input:focus {
+  border-color: #555562 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px #555562 !important;
+}
+
+/* 输入框 placeholder 颜色 */
+::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* ScrollArea 及其子容器 */
+[class*="ScrollArea"],
+[class*="ScrollArea"] > div,
+[class*="overflow-y-auto"] {
+  background-color: #1a1d29 !important;
+}
+
+/* 查询条件区域背景 - 与整体页面一致 */
+div.bg-primary-dark,
+[class*="bg-primary-dark"] {
+  background-color: #1a1d29 !important;
+}
+
+/* 查询条件区域外层容器（border-b-4 border-black 所在 div） */
+.sticky.border-b-4,
+div[class*="sticky"][class*="border-b"] {
+  border-bottom-color: #3a3a46 !important;
+}
+
+/* 分割线 border-black 覆盖为深灰色 */
+.border-black {
+  border-color: #3a3a46 !important;
+}
+
+/* 表格内部分割线 - 覆盖蓝色边框为深灰色 */
+.border-secondary-light,
+[class*="border-secondary"] {
+  border-color: #3a3a46 !important;
+}
+td[class*="border-"],
+th[class*="border-"],
+tr[class*="border-"],
+table td,
+table th {
+  border-color: #2d2d38 !important;
+}
+
+/* 分页区域按钮/选择框边框 - 覆盖蓝色为深灰色 */
+.border-primary-main,
+button[class*="border-primary"] {
+  border-color: #3a3a46 !important;
+}
+button[class*="border-primary"]:hover,
+button[class*="border-primary"]:focus {
+  border-color: #555562 !important;
+}
+
+/* "总代谢肿瘤体积"等操作按钮 - 覆盖蓝色背景为深色 */
+.bg-primary-main,
+button[class*="bg-primary-main"],
+.text-white[class*="rounded"][class*="inline-flex"]:not([class*="ghost"]):not([class*="outline"]) {
+  background-color: #2e3854 !important;
+}
+.bg-primary-main:hover,
+button[class*="bg-primary-main"]:hover,
+.hover\:bg-customblue-80:hover {
+  background-color: #3a4562 !important;
+}
+.bg-primary-main:active,
+button[class*="bg-primary-main"]:active,
+.active\:bg-customblue-40:active {
+  background-color: #252d44 !important;
+}
+
+/* 表格行背景 - 深蓝灰 */
+table,
+tr,
+td,
+th,
+tbody tr,
+thead th,
+[class*="studyRow"],
+[class*="StudyListTable"] {
+  background-color: #1a1d29 !important;
+}
+tbody tr:nth-child(even),
+tr:nth-child(even) td {
+  background-color: #1f2333 !important;
+}
+
+/* 分页区域背景 */
+[class*="Pagination"],
+[class*="pagination"] {
+  background-color: #1a1d29 !important;
+}
+
+/* ======== 表格行交互状态 - 悬停时变为导航栏深蓝灰色 ======== */
+
+/* 悬停/选中状态：导航栏同款深蓝灰 */
+tbody tr:hover,
+tbody tr:hover td,
+table tbody tr:hover,
+table tbody tr:hover td,
+.StudyListTable tr:hover,
+.StudyListTable tr:hover td,
+[class*="studyRow"]:hover,
+[data-cy*="studyRow"]:hover,
+tr[class*="hover"]:hover,
+td[class*="hover"]:hover,
+.hover\:bg-secondary-main:hover {
+  background-color: #2e3854 !important;
+  background: #2e3854 !important;
+}
+
+/* 偶数行悬停也用导航栏色 */
+tbody tr:nth-child(even):hover,
+tbody tr:nth-child(even):hover td,
+tr:nth-child(even):hover,
+tr:nth-child(even):hover td {
+  background-color: #2e3854 !important;
+}
+
+/* 强制所有表格行使用统一深色背景 */
+tbody tr,
+tbody tr td,
+table tbody tr,
+table tbody tr td,
+.StudyListTable tr,
+.StudyListTable tr td,
+[class*="studyRow"],
+[data-cy^="studyRow"] {
+  background-color: #1a1d29 !important;
+  transition: none !important;
+}
+
+/* 偶数行微差背景 */
+tbody tr:nth-child(even),
+tbody tr:nth-child(even) td,
+tr:nth-child(even) {
+  background-color: #1f2333 !important;
+}
+
+/* 覆盖表格行内的 bg-primary-dark/bg-secondary-dark（点击展开时的背景变化） */
+tbody .bg-primary-dark,
+tbody .bg-secondary-dark,
+tbody .bg-secondary-main,
+tr .bg-primary-dark,
+tr .bg-secondary-dark,
+tr .bg-secondary-main {
+  background-color: #1a1d29 !important;
+}
+
+/* 展开行内部子表格行也保持原样式 */
+table table tbody tr,
+table table tbody tr:hover,
+table table tr td {
+  background-color: transparent !important;
 }
