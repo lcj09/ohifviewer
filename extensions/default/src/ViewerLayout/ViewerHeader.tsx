@@ -1,3 +1,12 @@
+/**
+ * ============================================================================
+ * ViewerHeader.tsx - 图像查看器头部导航栏
+ * 修改日期: 2026-06-17
+ * 修改内容:
+ *   - 移除 Header 组件的 UndoRedo prop（撤销/重做按钮已移至工具栏 SaveMenu 组件内）
+ *   - 避免导航栏和工具栏同时显示两组撤销/重做按钮
+ * ============================================================================
+ */
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -95,28 +104,6 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
             appConfig={appConfig}
           />
         )
-      }
-      UndoRedo={
-        <div className="text-primary flex cursor-pointer items-center">
-          <Button
-            variant="ghost"
-            className="hover:bg-muted"
-            onClick={() => {
-              commandsManager.run('undo');
-            }}
-          >
-            <Icons.Undo className="" />
-          </Button>
-          <Button
-            variant="ghost"
-            className="hover:bg-muted"
-            onClick={() => {
-              commandsManager.run('redo');
-            }}
-          >
-            <Icons.Redo className="" />
-          </Button>
-        </div>
       }
     >
       <div className="relative flex justify-center gap-[4px]">

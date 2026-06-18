@@ -282,7 +282,45 @@ function SaveMenu({ commandsManager, servicesManager, ...props }) {
   };
 
   return (
-    <div id="SaveMenu" data-cy="SaveMenu">
+    <div id="SaveMenu" data-cy="SaveMenu" className="flex items-center gap-0">
+      {/* ========== 撤销/重做功能按钮（2026-06-16 添加）========== */}
+      {/* 撤销按钮：回退上一步标注操作 */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground/80 hover:bg-background hover:text-highlight"
+            aria-label="撤销"
+            onClick={() => commandsManager.run('undo')}
+          >
+            <Icons.Undo className="h-6 w-6" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <div>撤销 (Ctrl+Z)</div>
+        </TooltipContent>
+      </Tooltip>
+
+      {/* 重做按钮：恢复被撤销的标注操作 */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground/80 hover:bg-background hover:text-highlight"
+            aria-label="重做"
+            onClick={() => commandsManager.run('redo')}
+          >
+            <Icons.Redo className="h-6 w-6" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <div>重做 (Ctrl+Y)</div>
+        </TooltipContent>
+      </Tooltip>
+
+      {/* 原有保存菜单按钮 */}
       <Popover open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <Tooltip>
           <TooltipTrigger asChild>
