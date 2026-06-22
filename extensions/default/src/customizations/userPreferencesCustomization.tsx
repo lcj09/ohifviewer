@@ -126,7 +126,7 @@ function UserPreferencesModalDefault({ hide }: { hide: () => void }) {
   return (
     <UserPreferencesModal>
       <UserPreferencesModal.Body>
-        {/* Language Section */}
+        {/* 暂时屏蔽语言设置
         <div className="mb-3 flex items-center space-x-14">
           <UserPreferencesModal.SubHeading>{t('Language')}</UserPreferencesModal.SubHeading>
           <Select
@@ -151,6 +151,7 @@ function UserPreferencesModalDefault({ hide }: { hide: () => void }) {
             </SelectContent>
           </Select>
         </div>
+        */}
 
         <UserPreferencesModal.SubHeading>{t('Hotkeys')}</UserPreferencesModal.SubHeading>
         <UserPreferencesModal.HotkeysGrid>

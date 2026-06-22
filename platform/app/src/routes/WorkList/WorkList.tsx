@@ -487,16 +487,17 @@ function WorkList({
   ) as coreTypes.MenuComponentCustomization;
 
   const menuOptions = [
-    {
-      title: AboutModal?.menuTitle ?? t('Header:About'),
-      icon: 'info',
-      onClick: () =>
-        show({
-          content: AboutModal,
-          title: AboutModal?.title ?? t('AboutModal:About OHIF Viewer'),
-          containerClassName: AboutModal?.containerClassName ?? 'max-w-md',
-        }),
-    },
+    // 暂时屏蔽"关于"按钮
+    // {
+    //   title: AboutModal?.menuTitle ?? t('Header:About'),
+    //   icon: 'info',
+    //   onClick: () =>
+    //     show({
+    //       content: AboutModal,
+    //       title: AboutModal?.title ?? t('AboutModal:About OHIF Viewer'),
+    //       containerClassName: AboutModal?.containerClassName ?? 'max-w-md',
+    //     }),
+    // },
     {
       title: UserPreferencesModal.menuTitle ?? t('Header:Preferences'),
       icon: 'settings',
