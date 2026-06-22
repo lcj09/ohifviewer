@@ -11,12 +11,6 @@ export default {
       iconName: 'DicomTagBrowser',
       commands: 'openDICOMTagViewer',
     },
-    {
-      id: 'addAsLayer',
-      label: i18n.t('StudyBrowser:Add as Layer'),
-      iconName: 'ViewportViews',
-      commands: 'addDisplaySetAsLayer',
-    },
   ],
   'studyBrowser.sortFunctions': [
     {
