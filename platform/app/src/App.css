@@ -77,6 +77,51 @@ a:not([class*="text-"]) {
   color: #b6bcc8 !important;
 }
 
+/* 工具栏按钮 - 更亮的白色 */
+.text-foreground\/80,
+[class*="text-foreground"] {
+  color: #ffffff !important;
+}
+/* 工具栏按钮 hover 状态 */
+.hover\:text-highlight:hover,
+button[class*="rounded-lg"]:hover {
+  color: #ffffff !important;
+}
+
+/* 工具栏按钮选中状态 - 渐变蓝色背景 */
+.bg-highlight,
+button[class*="rounded-lg"][data-active="true"],
+.bg-highlight\/80,
+/* 自定义工具栏按钮选中状态（SaveMenu/FusionAdjustMenu等 bg-primary/20） */
+[class*="bg-primary\/20"],
+/* 布局选择器选中状态 */
+.bg-accent {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+  border-radius: 8px !important;
+}
+.bg-highlight:hover,
+.bg-highlight\/80:hover,
+.hover\:\!bg-highlight\/80:hover {
+  background: linear-gradient(135deg, #60a5fa, #2563eb) !important;
+}
+
+/* 工具栏按钮 hover 时禁止黑色背景 */
+.hover\:bg-background:hover,
+button[class*="rounded-lg"]:hover:not([data-active="true"]):not(.bg-accent):not([class*="bg-primary"]) {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+/* 工具栏按钮 点击/聚焦 时也禁止黑色背景 */
+button[class*="rounded-lg"]:active,
+button[class*="rounded-lg"]:focus {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+button[class*="rounded-lg"][data-active="true"]:active,
+button[class*="rounded-lg"][data-active="true"]:focus,
+[class*="bg-primary\/20"]:active,
+[class*="bg-primary\/20"]:focus {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+}
+
 /* 文字-信息：浅蓝白 */
 .text-neutral-light {
   color: #d1e4ff !important;
