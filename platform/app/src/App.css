@@ -5,9 +5,14 @@ body {
 
 /* TMTV 界面主色调 - 与 jsconfigBS 保持一致 */
 
-/* 导航栏背景：深蓝灰渐变（不依赖主题选择器） */
+/* 导航栏背景：深靛蓝/藏青色（工具栏按钮行 - 与iMedical截图一致） */
 .bg-popover {
-  background: linear-gradient(90deg, #2b3652 0%, #435170 100%) !important;
+  background: #182a4a !important;
+}
+
+/* 顶部患者信息导航栏：稍浅的靛蓝 */
+.bg-topbar {
+  background: #1e3556 !important;
 }
 
 /* 侧边栏背景：纯黑 */
@@ -341,4 +346,54 @@ table table tbody tr,
 table table tbody tr:hover,
 table table tr td {
   background-color: transparent !important;
+}
+
+/* ======== 缩略图样式 - 与截图一致 ======== */
+
+/* 缩略图容器背景 */
+div[id^="thumbnail-"] {
+  background-color: #1a1d29 !important;
+}
+/* 缩略图 hover 状态 */
+div[id^="thumbnail-"]:hover {
+  background-color: #252b3b !important;
+}
+/* 缩略图选中状态 - 蓝色边框 */
+div[id^="thumbnail-"].bg-popover,
+div[id^="thumbnail-"][class*="rounded"] {
+  border: 2px solid #3b82f6 !important;
+  box-sizing: border-box !important;
+}
+
+/* ======== 工具栏样式 - 与截图一致 ======== */
+
+/* 工具栏容器背景：深蓝灰 */
+.bg-muted {
+  background-color: #1e2235 !important;
+}
+
+/* 工具栏区域整体背景 */
+.OHIFToolbox,
+[class*="Toolbox"],
+[class*="toolbar"] {
+  background-color: #1e2235 !important;
+}
+
+/* 工具栏分隔线/边框 */
+[class*="Toolbox"] [class*="border"],
+[class*="Toolbox"] > hr,
+[class*="toolbar"] [class*="border"] {
+  border-color: #3a3a46 !important;
+}
+
+/* 工具栏标题文字 */
+[class*="Toolbox"] [class*="Header"],
+[class*="toolbar"] span {
+  color: #ffffff !important;
+}
+
+/* 工具栏设置区域背景 */
+.ToolSettings,
+[class*="ToolSettings"] {
+  background-color: #1e2235 !important;
 }

@@ -67,6 +67,7 @@ interface HeaderProps {
   PatientInfo?: ReactNode;
   Secondary?: ReactNode;
   UndoRedo?: ReactNode;
+  showLogoText?: boolean;
 }
 
 function Header({
@@ -79,6 +80,7 @@ function Header({
   PatientInfo,
   UndoRedo,
   Secondary,
+  showLogoText = true,
   ...props
 }: HeaderProps): ReactNode {
   const onClickReturn = () => {
@@ -91,40 +93,47 @@ function Header({
     <IconPresentationProvider
       size="large"
       IconContainer={ToolButton}
+      showLabel={true}
     >
       <NavBar
         isSticky={isSticky}
         {...props}
       >
-        <div className="relative h-[48px] items-center">
-          <div className="absolute left-0 top-1/2 flex -translate-y-1/2 items-center">
+        <div className="relative h-[56px] items-center">
+          {/* 工具栏容器：gap-[12px] 统一控制所有按钮组之间的间距（按钮+文字作为整体） */}
+          <div className="absolute left-0 top-1/2 flex -translate-y-1/2 items-center gap-[12px]">
             <div
               className={classNames(
-                'mr-3 inline-flex items-center',
+                'inline-flex items-center',
                 isReturnEnabled && 'cursor-pointer'
               )}
               onClick={onClickReturn}
               data-cy="return-to-work-list"
             >
               {isReturnEnabled && <Icons.ArrowLeft className="text-primary ml-1 h-7 w-7" />}
+              {/* 东华医为 Logo */}
+              {showLogoText && (
+              <div className="ml-2 font-bold text-white" style={{ fontSize: '18px' }}>
+                东华医为
+              </div>
+              )}
+              {/* 暂时屏蔽东华医为Logo
               <div className="ml-1">
                 {WhiteLabeling?.createLogoComponentFn?.(React, props) || <Icons.OHIFLogo />}
               </div>
+              */}
             </div>
-          </div>
-          <div className="absolute top-1/2 left-[250px] h-8 -translate-y-1/2">{Secondary}</div>
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
-            <div className="flex items-center justify-center space-x-2">{children}</div>
+            {/* 工具栏按钮紧跟在 Logo 右侧左对齐 */}
+            {Secondary}
+            <div className="flex items-center space-x-2">{children}</div>
           </div>
           <div className="absolute right-0 top-1/2 flex -translate-y-1/2 select-none items-center">
             {UndoRedo}
-            {/* 语言切换按钮（全局） */}
-            <div className="mr-2 flex-shrink-0">
-              <LanguageSwitcher />
-            </div>
             <div className="border-muted mx-1.5 h-[25px] border-r"></div>
             {PatientInfo}
             <div className="border-muted mx-1.5 h-[25px] border-r"></div>
+            {/* 设置按钮 - 当 menuOptions 为空时隐藏 */}
+            {menuOptions.length > 0 && (
             <div className="flex-shrink-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -159,6 +168,7 @@ function Header({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+            )}
           </div>
         </div>
       </NavBar>

@@ -92,21 +92,15 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
 
   return (
     <Header
-      menuOptions={menuOptions}
+      menuOptions={[]}
       isReturnEnabled={!!appConfig.showStudyList}
       onClickReturnButton={onClickReturnButton}
       WhiteLabeling={appConfig.whiteLabeling}
+      showLogoText={false}
       Secondary={<Toolbar buttonSection="secondary" />}
-      PatientInfo={
-        appConfig.showPatientInfo !== PatientInfoVisibility.DISABLED && (
-          <HeaderPatientInfo
-            servicesManager={servicesManager}
-            appConfig={appConfig}
-          />
-        )
-      }
     >
-      <div className="relative flex justify-center gap-[4px]">
+      {/* 主工具栏：gap-[12px] 控制按钮组间距，按钮与文字作为整体不分离 */}
+      <div className="relative flex justify-center gap-[12px]">
         <Toolbar buttonSection="primary" />
       </div>
     </Header>

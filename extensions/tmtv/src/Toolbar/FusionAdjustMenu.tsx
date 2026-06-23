@@ -142,17 +142,20 @@ function FusionAdjustMenu({ commandsManager, servicesManager, ...props }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground/80 hover:bg-background hover:text-highlight ${
-                  isToolActive ? 'bg-primary/20 text-highlight' : ''
-                }`}
-                aria-label="微调"
-                onClick={handleToggleTool}
-              >
-                <Icons.ByName name="tool-fusion-adjust" className="h-7 w-7" />
-              </Button>
+              <div className="flex h-[56px] flex-col items-center justify-between gap-0 py-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground/80 hover:bg-background hover:text-highlight ${
+                    isToolActive ? 'bg-primary/20 text-highlight' : ''
+                  }`}
+                  aria-label="微调"
+                  onClick={handleToggleTool}
+                >
+                  <Icons.ByName name="tool-fusion-adjust" className="h-7 w-7" />
+                </Button>
+                <span className="text-[12px] leading-tight text-white whitespace-nowrap">微调</span>
+              </div>
             </PopoverTrigger>
           </TooltipTrigger>
           <TooltipContent side="bottom">

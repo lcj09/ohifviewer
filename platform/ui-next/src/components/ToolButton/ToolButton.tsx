@@ -39,6 +39,7 @@ interface ToolButtonProps {
   onInteraction?: (details: { itemId: string; commands?: Record<string, unknown> }) => void;
   className?: string;
   children?: React.ReactNode;
+  showLabel?: boolean;
 }
 
 function ToolButton(props: ToolButtonProps) {
@@ -55,10 +56,12 @@ function ToolButton(props: ToolButtonProps) {
     onInteraction,
     className,
     children,
+    showLabel = false,
   } = props;
 
-  const { className: iconClassName } = useIconPresentation();
+  const { className: iconClassName, showLabel: ctxShowLabel } = useIconPresentation();
   const { buttonSizeClass, iconSizeClass } = sizeClasses[size] || sizeClasses.default;
+  const showLabelFinal = showLabel || ctxShowLabel;
 
   const buttonClasses = cn(
     baseClasses,
@@ -85,6 +88,7 @@ function ToolButton(props: ToolButtonProps) {
           data-cy={id}
           data-tool={id}
           data-active={isActive}
+          className={showLabelFinal ? 'flex h-[56px] flex-col items-center justify-between py-1' : ''}
         >
           <Button
             className={buttonClasses}
@@ -106,6 +110,17 @@ function ToolButton(props: ToolButtonProps) {
               />
             )}
           </Button>
+          {showLabelFinal && label && (
+            <span className="text-[12px] leading-tight text-white whitespace-nowrap">
+              {label}
+            </span>
+          )}
+          {/* 没有label时显示id作为fallback */}
+          {showLabelFinal && !label && (
+            <span className="text-[12px] leading-tight text-white whitespace-nowrap">
+              {id}
+            </span>
+          )}
         </span>
       </TooltipTrigger>
       <TooltipContent

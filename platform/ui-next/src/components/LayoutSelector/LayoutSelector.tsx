@@ -113,6 +113,7 @@ type TriggerProps = {
   tooltip?: string;
   disabled?: boolean;
   disabledText?: string;
+  label?: string;
 };
 
 const Trigger = ({
@@ -121,12 +122,13 @@ const Trigger = ({
   tooltip = 'Change layout',
   disabled = false,
   disabledText,
+  label,
 }: TriggerProps) => {
   const { isOpen } = useLayoutSelector();
 
   const hasTooltip = tooltip || (disabled && disabledText);
 
-  const button = (
+  const buttonContent = (
     <Button
       className={cn(
         'inline-flex h-10 w-10 items-center justify-center !rounded-lg',
@@ -149,6 +151,38 @@ const Trigger = ({
     </Button>
   );
 
+  // If label is provided, wrap button with label text below
+  if (label) {
+    const labeledButton = (
+      <div className="flex h-[56px] flex-col items-center justify-between gap-0 py-1">
+        {buttonContent}
+        <span className="text-[12px] leading-tight text-white whitespace-nowrap">{label}</span>
+      </div>
+    );
+
+    if (!isOpen && hasTooltip) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <span data-cy="layout-button">{labeledButton}</span>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {tooltip && <div>{tooltip}</div>}
+            {disabled && disabledText && <div className="text-muted-foreground">{disabledText}</div>}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return (
+      <PopoverTrigger asChild>
+        <span data-cy="layout-button">{labeledButton}</span>
+      </PopoverTrigger>
+    );
+  }
+
   // If user passed children (custom button), just wrap it directly
   if (children) {
     return (
@@ -166,7 +200,7 @@ const Trigger = ({
       <Tooltip>
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
-            <span data-cy="layout-button">{button}</span>
+            <span data-cy="layout-button">{buttonContent}</span>
           </PopoverTrigger>
         </TooltipTrigger>
         <TooltipContent side="bottom">
@@ -179,7 +213,7 @@ const Trigger = ({
 
   return (
     <PopoverTrigger asChild>
-      <span data-cy="layout-button">{button}</span>
+      <span data-cy="layout-button">{buttonContent}</span>
     </PopoverTrigger>
   );
 };

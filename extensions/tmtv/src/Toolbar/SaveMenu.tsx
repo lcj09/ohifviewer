@@ -281,21 +281,25 @@ function SaveMenu({ commandsManager, servicesManager, ...props }) {
     }
   };
 
+  // SaveMenu 容器：gap-[12px] 控制撤销/重做/保存按钮组间距，按钮与文字作为整体
   return (
-    <div id="SaveMenu" data-cy="SaveMenu" className="flex items-center gap-0">
+    <div id="SaveMenu" data-cy="SaveMenu" className="flex items-center gap-[12px]">
       {/* ========== 撤销/重做功能按钮（2026-06-16 添加）========== */}
       {/* 撤销按钮：回退上一步标注操作 */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground/80 hover:bg-background hover:text-highlight"
-            aria-label="撤销"
-            onClick={() => commandsManager.run('undo')}
-          >
-            <Icons.Undo className="h-6 w-6" />
-          </Button>
+          <div className="flex h-[56px] flex-col items-center justify-between gap-0 py-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground/80 hover:bg-background hover:text-highlight"
+              aria-label="撤销"
+              onClick={() => commandsManager.run('undo')}
+            >
+              <Icons.Undo className="h-6 w-6" />
+            </Button>
+            <span className="text-[12px] leading-tight text-white whitespace-nowrap">撤销</span>
+          </div>
         </TooltipTrigger>
         <TooltipContent side="bottom">
           <div>撤销 (Ctrl+Z)</div>
@@ -305,15 +309,18 @@ function SaveMenu({ commandsManager, servicesManager, ...props }) {
       {/* 重做按钮：恢复被撤销的标注操作 */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground/80 hover:bg-background hover:text-highlight"
-            aria-label="重做"
-            onClick={() => commandsManager.run('redo')}
-          >
-            <Icons.Redo className="h-6 w-6" />
-          </Button>
+          <div className="flex h-[56px] flex-col items-center justify-between gap-0 py-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground/80 hover:bg-background hover:text-highlight"
+              aria-label="重做"
+              onClick={() => commandsManager.run('redo')}
+            >
+              <Icons.Redo className="h-6 w-6" />
+            </Button>
+            <span className="text-[12px] leading-tight text-white whitespace-nowrap">重做</span>
+          </div>
         </TooltipTrigger>
         <TooltipContent side="bottom">
           <div>重做 (Ctrl+Y)</div>
@@ -325,17 +332,20 @@ function SaveMenu({ commandsManager, servicesManager, ...props }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground/80 hover:bg-background hover:text-highlight ${
-                  isUploading ? 'animate-pulse bg-primary/20 text-highlight' : ''
-                }`}
-                aria-label="保存"
-                disabled={isUploading}
-              >
-                <Icons.ByName name="tool-save" className="h-7 w-7" />
-              </Button>
+              <div className="flex h-[56px] flex-col items-center justify-between gap-0 py-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground/80 hover:bg-background hover:text-highlight ${
+                    isUploading ? 'animate-pulse bg-primary/20 text-highlight' : ''
+                  }`}
+                  aria-label="保存"
+                  disabled={isUploading}
+                >
+                  <Icons.ByName name="tool-save" className="h-7 w-7" />
+                </Button>
+                <span className="text-[12px] leading-tight text-white whitespace-nowrap">保存</span>
+              </div>
             </PopoverTrigger>
           </TooltipTrigger>
           <TooltipContent side="bottom">

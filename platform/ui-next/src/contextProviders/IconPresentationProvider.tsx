@@ -15,6 +15,7 @@ interface IconSizeContextType {
     [key: string]: any;
   };
   className: string;
+  showLabel: boolean;
 }
 
 const sizeMap = {
@@ -46,6 +47,7 @@ const defaultContext: IconSizeContextType = {
     size: 'icon',
   },
   className: '',
+  showLabel: false,
 };
 
 export const IconSizeContext = createContext<IconSizeContextType>(defaultContext);
@@ -59,6 +61,7 @@ interface IconPresentationProviderProps {
     size?: string;
     [key: string]: any;
   };
+  showLabel?: boolean;
 }
 
 export const IconPresentationProvider = ({
@@ -66,6 +69,7 @@ export const IconPresentationProvider = ({
   children,
   IconContainer = Button,
   containerProps = {},
+  showLabel = false,
 }: IconPresentationProviderProps) => {
   const className = getSizeClassName(size);
   const mergedProps = {
@@ -81,6 +85,7 @@ export const IconPresentationProvider = ({
     IconContainer,
     containerProps: mergedProps,
     className,
+    showLabel,
   };
   return <IconSizeContext.Provider value={contextValue}>{children}</IconSizeContext.Provider>;
 };

@@ -173,7 +173,7 @@ function TmtvLayoutSelectorWithServices({
         onSelectionChange={handleSelectionChange}
         {...props}
       >
-        <LayoutSelector.Trigger tooltip={t('Change layout')} />
+        <LayoutSelector.Trigger tooltip={t('Change layout')} label="布局" />
         <LayoutSelector.Content>
           {/* TMTV专用布局预设区域 */}
           <div className="bg-popover flex flex-col gap-2.5 rounded-lg p-2 w-48">
