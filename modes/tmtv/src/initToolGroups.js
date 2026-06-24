@@ -25,8 +25,11 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
         bindings: [{ mouseButton: Enums.MouseBindings.Auxiliary }],
       },
       {
+        // [2026-06-24 修改] zoomToCenter: true - 缩放以视口中心为基准
+        // 默认 false 时以鼠标位置为中心，放大后缩小会导致图像位置偏移
         toolName: toolNames.Zoom,
         bindings: [{ mouseButton: Enums.MouseBindings.Secondary }, { numTouchPoints: 2 }],
+        configuration: { zoomToCenter: true },
       },
       {
         toolName: toolNames.StackScroll,
@@ -208,7 +211,8 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
     ],
     passive: [
       { toolName: toolNames.StackScroll },
-      { toolName: toolNames.Zoom },
+      // [2026-06-24 修改] MIP视口Zoom同样启用 zoomToCenter: true
+      { toolName: toolNames.Zoom, configuration: { zoomToCenter: true } },
       { toolName: toolNames.Pan },
       // [2026-05-11 新增] TrackballRotate工具 - 用于3D旋转MIP图像
       // 激活后替换MipJumpToClick的左键绑定，实现鼠标拖拽旋转
@@ -265,8 +269,11 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
         bindings: [{ mouseButton: Enums.MouseBindings.Primary }],
       },
       {
+        // [2026-06-24 修改] zoomToCenter: true - 缩放以视口中心为基准
+        // 默认 false 时以鼠标位置为中心，放大后缩小会导致图像位置偏移
         toolName: toolNames.Zoom,
         bindings: [{ mouseButton: Enums.MouseBindings.Secondary }, { numTouchPoints: 2 }],
+        configuration: { zoomToCenter: true },
       },
       {
         toolName: toolNames.Pan,
