@@ -57,11 +57,13 @@ export const RowSegmentedControl: React.FC<RowSegmentedControlProps> = ({
           value={option.value}
           onValueChange={handleValueChange}
         >
-          <TabsList className="inline-flex space-x-1">
+          {/* [2026-06-24 修改] Shape选择器样式优化：选中项蓝色背景，未选中项透明与背景融合 */}
+          <TabsList className="inline-flex gap-1 bg-transparent p-0">
             {option.values.map(({ label, value: itemValue }, index) => (
               <TabsTrigger
                 value={itemValue}
                 key={`button-${option.id}-${index}`}
+                className="data-[state=active]:!bg-blue-600 data-[state=active]:!text-white data-[state=inactive]:!bg-transparent data-[state=inactive]:text-foreground/70 rounded-md px-3 py-1 text-sm transition-colors hover:data-[state=inactive]:bg-white/10"
               >
                 {label}
               </TabsTrigger>
