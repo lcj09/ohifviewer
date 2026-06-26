@@ -160,6 +160,7 @@ function modeFactory({ modeConfiguration }) {
         'EllipticalROI',
         'PlanarFreehandROI',
         'CircleROI',
+        'SphereROI',     // [2026-06-26 新增] 球体测量工具 - SUV Max/Min/Mean + 面积 + 体积
         'Angle',        // [2026-05-15 新增] 角度测量工具 - 通过三点绘制角度
         'CobbAngle',    // [2026-05-15 新增] Cobb角测量工具 - 通过四点绘制Cobb角，用于脊柱侧弯测量
         'ClearMeasurements',

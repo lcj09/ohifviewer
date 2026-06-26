@@ -194,6 +194,20 @@ const toolbarButtons = [
       evaluate: 'evaluate.cornerstoneTool',
     },
   },
+  // [2026-06-26 新增] 球体测量工具（SphereROI）
+  // 功能：绘制圆形构建3D球体，计算 SUV Max/Min/Mean、面积、体积
+  // 适用于PT和CT视口，支持SUVbw和HU单位
+  {
+    id: 'SphereROI',
+    uiType: 'ohif.toolButton',
+    props: {
+      icon: 'tool-sphere-roi',
+      label: i18n.t('Buttons:Sphere'),
+      tooltip: i18n.t('Buttons:Sphere Tool'),
+      commands: setToolActiveToolbar,
+      evaluate: 'evaluate.cornerstoneTool',
+    },
+  },
   // [2026-05-15 新增] 角度测量工具（Angle）
   // 功能：通过三点绘制角度，测量两条线段之间的夹角
   // 参考：基础查看器 modes/basic/src/toolbarButtons.ts 中的 Angle 按钮定义

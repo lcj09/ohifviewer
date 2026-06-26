@@ -3,6 +3,7 @@ import Length from './Length';
 import Bidirectional from './Bidirectional';
 import EllipticalROI from './EllipticalROI';
 import CircleROI from './CircleROI';
+import SphereROI from './SphereROI';
 import ArrowAnnotate from './ArrowAnnotate';
 import CobbAngle from './CobbAngle';
 import Angle from './Angle';
@@ -40,6 +41,7 @@ const measurementServiceMappingsFactory = (
       Length: POLYLINE,
       EllipticalROI: ELLIPSE,
       CircleROI: CIRCLE,
+      SphereROI: CIRCLE,
       RectangleROI: RECTANGLE,
       PlanarFreehandROI: POLYLINE,
       Bidirectional: BIDIRECTIONAL,
@@ -138,6 +140,22 @@ const measurementServiceMappingsFactory = (
       toAnnotation: CircleROI.toAnnotation,
       toMeasurement: csToolsAnnotation =>
         CircleROI.toMeasurement(
+          csToolsAnnotation,
+          displaySetService,
+          cornerstoneViewportService,
+          _getValueTypeFromToolType,
+          customizationService
+        ),
+      matchingCriteria: [
+        {
+          valueType: MeasurementService.VALUE_TYPES.CIRCLE,
+        },
+      ],
+    },
+    SphereROI: {
+      toAnnotation: SphereROI.toAnnotation,
+      toMeasurement: csToolsAnnotation =>
+        SphereROI.toMeasurement(
           csToolsAnnotation,
           displaySetService,
           cornerstoneViewportService,

@@ -736,6 +736,50 @@ export const ToolCircle = (props: IconProps) => (
   </svg>
 );
 
+export const ToolSphere = (props: IconProps) => (
+  <svg
+    width="28px"
+    height="28px"
+    viewBox="0 0 28 28"
+    version="1.1"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <g
+      id="tool-sphere"
+      stroke="none"
+      strokeWidth="1"
+      fill="none"
+      fillRule="evenodd"
+    >
+      <rect
+        id="Rectangle"
+        x="0"
+        y="0"
+        width="28"
+        height="28"
+      ></rect>
+      <circle
+        id="OuterCircle"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        cx="14"
+        cy="14"
+        r="9.5"
+      ></circle>
+      <ellipse
+        id="Equator"
+        stroke="currentColor"
+        strokeWidth="1"
+        cx="14"
+        cy="14"
+        rx="9.5"
+        ry="3.5"
+      ></ellipse>
+    </g>
+  </svg>
+);
+
 export const ToolCobbAngle = (props: IconProps) => (
   <svg
     width="28px"

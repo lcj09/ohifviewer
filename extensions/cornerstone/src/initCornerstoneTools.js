@@ -53,6 +53,7 @@ import CalibrationLineTool from './tools/CalibrationLineTool';
 import ImageOverlayViewerTool from './tools/ImageOverlayViewerTool';
 import SingleSliceLineTool from './tools/SingleSliceLineTool';
 import FusionAdjustTool from './tools/FusionAdjustTool';
+import SphereROITool from './tools/SphereROITool';
 
 export default function initCornerstoneTools(configuration = {}) {
   CrosshairsTool.isAnnotation = false;
@@ -86,6 +87,7 @@ export default function initCornerstoneTools(configuration = {}) {
   addTool(RectangleROIThresholdTool);
   addTool(EllipticalROITool);
   addTool(CircleROITool);
+  addTool(SphereROITool);
   addTool(BidirectionalTool);
   addTool(ArrowAnnotateTool);
   addTool(DragProbeTool);
@@ -152,6 +154,7 @@ const toolNames = {
   RectangleROIThreshold: RectangleROIThresholdTool.toolName,
   EllipticalROI: EllipticalROITool.toolName,
   CircleROI: CircleROITool.toolName,
+  SphereROI: SphereROITool.toolName,
   Bidirectional: BidirectionalTool.toolName,
   Angle: AngleTool.toolName,
   CobbAngle: CobbAngleTool.toolName,

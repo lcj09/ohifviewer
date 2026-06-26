@@ -65,6 +65,8 @@ function _initToolGroups(toolNames, Enums, toolGroupService, commandsManager) {
       // 2026-04-29 - 添加多边形测量和圆测量工具到passive数组
       { toolName: toolNames.PlanarFreehandROI },
       { toolName: toolNames.CircleROI },
+      // [2026-06-26 新增] 球体测量工具 - 3D球体统计(SUV Max/Min/Mean, 面积, 体积)
+      { toolName: toolNames.SphereROI },
       { toolName: toolNames.StackScroll },
       { toolName: toolNames.Angle },
       { toolName: toolNames.CobbAngle },

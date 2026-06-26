@@ -2,6 +2,7 @@ const supportedTools = [
   'Length',
   'EllipticalROI',
   'CircleROI',
+  'SphereROI',
   'Bidirectional',
   'ArrowAnnotate',
   'Angle',
