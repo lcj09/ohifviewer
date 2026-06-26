@@ -130,10 +130,59 @@ function WorkList({
   // ~ Rows & Studies
   const [expandedRows, setExpandedRows] = useState([]);
   const [studiesWithSeriesData, setStudiesWithSeriesData] = useState([]);
+  // [2026-06-26 新增] 序列复选框选中状态：Map<studyInstanceUid, Set<seriesInstanceUid>>
+  const [selectedSeriesMap, setSelectedSeriesMap] = useState(new Map());
   const numOfStudies = studiesTotal;
   const querying = useMemo(() => {
     return isLoadingData || expandedRows.length > 0;
   }, [isLoadingData, expandedRows]);
+
+  // [2026-06-26 新增] 切换单个序列选中状�?
+  const handleSeriesToggle = (studyInstanceUid, seriesInstanceUid) => {
+    setSelectedSeriesMap(prev => {
+      const next = new Map(prev);
+      const selected = next.get(studyInstanceUid) || new Set();
+      if (selected.has(seriesInstanceUid)) {
+        selected.delete(seriesInstanceUid);
+      } else {
+        selected.add(seriesInstanceUid);
+      }
+      next.set(studyInstanceUid, selected);
+      return next;
+    });
+  };
+
+  // [2026-06-26 新增] 全�?取消全选当前检查的序列
+  const handleSeriesSelectAll = (studyInstanceUid, seriesList, checked) => {
+    setSelectedSeriesMap(prev => {
+      const next = new Map(prev);
+      if (checked) {
+        const allUids = new Set(seriesList.map(s => s.seriesInstanceUid));
+        next.set(studyInstanceUid, allUids);
+      } else {
+        next.delete(studyInstanceUid);
+      }
+      return next;
+    });
+  };
+
+  // [2026-06-26 新增] 启动TMTV，只加载选中的两个序�?
+  const handleLaunchTMTV = (studyInstanceUid, selectedSeriesUids) => {
+    const query = new URLSearchParams();
+    if (filterValues.configUrl) {
+      query.append('configUrl', filterValues.configUrl);
+    }
+    query.append('StudyInstanceUIDs', studyInstanceUid);
+    // 传递选中的序列UID，用逗号分隔
+    query.append('SeriesInstanceUIDs', selectedSeriesUids.join(','));
+    preserveQueryParameters(query);
+
+    // 跳转到TMTV模式
+    const tmtvMode = appConfig.loadedModes?.find(m => m.routeName === 'tmtv');
+    if (tmtvMode) {
+      window.location.href = `${tmtvMode.routeName}${dataPath || ''}?${query.toString()}`;
+    }
+  };
 
   const setFilterValues = val => {
     if (filterValues.pageNumber === val.pageNumber) {
@@ -206,7 +255,7 @@ function WorkList({
       skipNull: true,
       skipEmptyString: true,
     });
-    //构建查询字符串
+    //构建查询字符�?
     navigate({
       pathname: '/',
       search: search ? `?${search}` : undefined,
@@ -363,11 +412,15 @@ function WorkList({
             modality: t('StudyList:Modality'),
             instances: t('StudyList:Instances'),
           }}
+          selectedSeries={selectedSeriesMap.get(studyInstanceUid) || new Set()}
+          onSeriesToggle={(seriesInstanceUid) => handleSeriesToggle(studyInstanceUid, seriesInstanceUid)}
+          onLaunchTMTV={(selectedSeriesUids) => handleLaunchTMTV(studyInstanceUid, selectedSeriesUids)}
           seriesTableDataSource={
             seriesInStudiesMap.has(studyInstanceUid)
               ? seriesInStudiesMap.get(studyInstanceUid).map(s => {
                   return {
-                    description: s.description || '(无)',
+                    seriesInstanceUid: s.seriesInstanceUid,
+                    description: s.description || '(�?',
                     seriesNumber: s.seriesNumber ?? '',
                     modality: s.modality || '',
                     instances: s.numSeriesInstances || '',
@@ -375,101 +428,7 @@ function WorkList({
                 })
               : []
           }
-        >
-          <div className="flex flex-row gap-2">
-            {(appConfig.groupEnabledModesFirst
-              ? appConfig.loadedModes.sort((a, b) => {
-                  const isValidA = a.isValidMode({
-                    modalities: modalities.replaceAll('/', '\\'),
-                    study,
-                  }).valid;
-                  const isValidB = b.isValidMode({
-                    modalities: modalities.replaceAll('/', '\\'),
-                    study,
-                  }).valid;
-
-                  return isValidB - isValidA;
-                })
-              : appConfig.loadedModes//遍历所有可用模式，生成启动按钮
-            ).map((mode, i) => {
-              if (mode.hide || mode.routeName !== 'tmtv') {
-                // 只保留总体积代谢(TMTV)模式，屏蔽其他所有模式
-                //可以放开别的模式
-                 //if (mode.hide || mode.routeName === 'microscopy') {
-                //// Hide this mode from display（屏蔽显微镜模式）
-                //return null;
-                return null;
-              }
-              const modalitiesToCheck = modalities.replaceAll('/', '\\');
-
-              const { valid: isValidMode, description: invalidModeDescription } = mode.isValidMode({
-                modalities: modalitiesToCheck,
-                study,
-              });
-              if (isValidMode === null) {
-                // Hide this as a computed result.
-                return null;
-              }
-
-              // TODO: Modes need a default/target route? We mostly support a single one for now.
-              // We should also be using the route path, but currently are not
-              // mode.routeName
-              // mode.routes[x].path
-              // Don't specify default data source, and it should just be picked up... (this may not currently be the case)
-              // How do we know which params to pass? Today, it's just StudyInstanceUIDs and configUrl if exists
-              const query = new URLSearchParams();//生成模式链接 http://localhost:3000/tmtv?StudyInstanceUIDs=1.2.3.4.5
-              if (filterValues.configUrl) {
-                query.append('configUrl', filterValues.configUrl);
-              }
-              query.append('StudyInstanceUIDs', studyInstanceUid);
-              preserveQueryParameters(query);
-
-              return (
-                mode.displayName && (
-                  <Link
-                    className={isValidMode ? '' : 'cursor-not-allowed'}
-                    key={i}
-                    to={`${mode.routeName}${dataPath || ''}?${query.toString()}`}
-                    onClick={event => {
-                      // In case any event bubbles up for an invalid mode, prevent the navigation.
-                      // For example, the event bubbles up when the icon embedded in the disabled button is clicked.
-                      if (!isValidMode) {
-                        event.preventDefault();
-                      }
-                    }}
-                    // to={`${mode.routeName}/dicomweb?StudyInstanceUIDs=${studyInstanceUid}`}
-                  >
-                    {/* TODO revisit the completely rounded style of buttons used for launching a mode from the worklist later */}
-                    <Button
-                      type={ButtonEnums.type.primary}
-                      size={ButtonEnums.size.smallTall}
-                      disabled={!isValidMode}
-                      startIconTooltip={
-                        !isValidMode ? (
-                          <div className="font-inter flex w-[206px] whitespace-normal text-left text-xs font-normal text-white">
-                            {invalidModeDescription}
-                          </div>
-                        ) : null
-                      }
-                      startIcon={
-                        isValidMode ? (
-                          <Icons.LaunchArrow className="!h-[20px] !w-[20px] text-black" />
-                        ) : (
-                          <Icons.LaunchInfo className="!h-[20px] !w-[20px] text-black" />
-                        )
-                      }
-                      onClick={() => {}}
-                      dataCY={`mode-${mode.routeName}-${studyInstanceUid}`}
-                      className={!isValidMode && 'bg-[#222d44]'}
-                    >
-                      {mode.displayName}
-                    </Button>
-                  </Link>
-                )
-              );
-            })}
-          </div>
-        </StudyListExpandedRow>
+        />
       ),
       onClickRow: () =>
         setExpandedRows(s => (isExpanded ? s.filter(n => rowKey !== n) : [...s, rowKey])),
