@@ -65,7 +65,7 @@ const StudyListExpandedRow = ({
           <button
             className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
               canLaunch
-                ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
+                ? 'bg-primary-main text-white hover:bg-primary-dark cursor-pointer'
                 : 'bg-gray-600 text-gray-400 cursor-not-allowed'
             }`}
             disabled={!canLaunch}
